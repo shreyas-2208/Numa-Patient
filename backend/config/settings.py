@@ -157,9 +157,9 @@ REST_FRAMEWORK = {
     )
 }
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = config("AUTH_USER_MODEL", default="users.User")
 
-ZOHO_MAIL_API_KEY = "your_zoho_mail_token_here"
-ZOHO_SMS_API_KEY = "your_zoho_sms_token_here"
-ZOHO_CHECKOUT_PAGE_ID = "your_checkout_page_id"
-ZOHO_API_KEY = "your_checkout_api_key"
+ZOHO_MAIL_API_KEY = config("ZOHO_MAIL_API_KEY")
+ZOHO_SMS_API_KEY = config("ZOHO_SMS_API_KEY")
+ZOHO_CHECKOUT_PAGE_ID = config("ZOHO_CHECKOUT_PAGE_ID")
+ZOHO_API_KEY = config("ZOHO_API_KEY")

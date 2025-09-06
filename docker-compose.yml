@@ -1,9 +1,25 @@
-version: '3.9'
+version: "3.9"
 
 services:
   backend:
     build: ./backend
+    container_name: numa-backend
+    volumes:
+      - ./backend:/backend
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend/.env
+    environment:
+      - DEBUG=1
+
+  frontend:
+    build: ./frontend
+    container_name: numa-frontend
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "notifications",
     "payments",
     "consultations",
+    "zoho",
 ]
 
 MIDDLEWARE = [

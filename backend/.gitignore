@@ -18,3 +18,5 @@ media/
 .vscode/
 .idea/
 *.swp
+
+.env

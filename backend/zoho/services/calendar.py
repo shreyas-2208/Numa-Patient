@@ -25,7 +25,7 @@ def get_events(calendar_id, from_date=None, to_date=None):
     if not from_date:
         from_date = datetime.now().strftime("%Y-%m-%d")
     if not to_date:
-        to_date = (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d")
+        to_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
 
     params = {"fromDate": from_date, "toDate": to_date}
     resp = requests.get(f"{BASE_URL}/calendars/{calendar_id}/events", headers=headers )

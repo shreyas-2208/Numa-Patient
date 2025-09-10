@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchTwoWeekSlots, createAppointment } from "../api/appointments";
+import styles from "./BookAppointment.module.css";
 
 function formatDateLabel(dateStr) {
   const d = new Date(dateStr);
@@ -68,17 +69,15 @@ function BookAppointment() {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Book Appointment</h2>
-      {error && (
-        <div style={{ color: "#b00020", marginBottom: 12 }}>{error}</div>
-      )}
-      {loading && <div>Loading...</div>}
+    <div className={styles.container}>
+      <h2 className={styles.title}>Book Appointment</h2>
+      {error && <div className={styles.error}>{error}</div>}
+      {loading && <div className={styles.muted}>Loading...</div>}
 
-      <div style={{ display: "flex", gap: 24 }}>
-        <div style={{ minWidth: 260 }}>
-          <h4>Select Date</h4>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+      <div className={styles.grid}>
+        <div className={styles.panel}>
+          <h4 className={styles.sectionTitle}>Select Date</h4>
+          <div className={styles.dates}>
             {dates.map((d) => (
               <button
                 key={d}
@@ -86,13 +85,7 @@ function BookAppointment() {
                   setSelectedDate(d);
                   setSelectedTime("");
                 }}
-                style={{
-                  padding: "10px 8px",
-                  cursor: "pointer",
-                  borderRadius: 8,
-                  border: d === selectedDate ? "2px solid #3f51b5" : "1px solid #ccc",
-                  background: d === selectedDate ? "#e8eaf6" : "white",
-                }}
+                className={`${styles.dateButton} ${d === selectedDate ? styles.dateButtonActive : ""}`}
               >
                 {formatDateLabel(d)}
               </button>
@@ -100,11 +93,11 @@ function BookAppointment() {
           </div>
         </div>
 
-        <div style={{ flex: 1 }}>
-          <h4>Available Slots</h4>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div className={styles.panel}>
+          <h4 className={styles.sectionTitle}>Available Slots</h4>
+          <div className={styles.slotsWrap}>
             {(slotsByDate[selectedDate] || []).length === 0 && (
-              <div>No slots available for this date.</div>
+              <div className={styles.muted}>No slots available for this date.</div>
             )}
             {(slotsByDate[selectedDate] || []).map((slot) => {
               const label = typeof slot === "string" ? slot : `${slot.start}-${slot.end}`;
@@ -113,13 +106,7 @@ function BookAppointment() {
                 <button
                   key={label}
                   onClick={() => setSelectedTime(value)}
-                  style={{
-                    padding: "8px 12px",
-                    cursor: "pointer",
-                    borderRadius: 20,
-                    border: value === selectedTime ? "2px solid #2e7d32" : "1px solid #ccc",
-                    background: value === selectedTime ? "#e8f5e9" : "white",
-                  }}
+                  className={`${styles.slotButton} ${value === selectedTime ? styles.slotButtonActive : ""}`}
                 >
                   {label}
                 </button>
@@ -127,17 +114,17 @@ function BookAppointment() {
             })}
           </div>
 
-          <div style={{ marginTop: 24 }}>
+          <div className={styles.actions}>
             <button
               onClick={handleContinueToPayment}
               disabled={loading || !selectedDate || !selectedTime}
-              style={{ padding: "10px 16px", cursor: "pointer" }}
+              className={styles.primaryBtn}
             >
               Continue to Payment
             </button>
             <button
               onClick={() => navigate(-1)}
-              style={{ padding: "10px 16px", marginLeft: 8, cursor: "pointer" }}
+              className={styles.secondaryBtn}
             >
               Cancel
             </button>

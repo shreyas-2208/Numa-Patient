@@ -1,0 +1,46 @@
+.wrap {
+  padding: 20px;
+}
+
+.title {
+  margin: 0 0 8px 0;
+}
+
+.desc {
+  color: #4b5563;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.error {
+  color: #b00020;
+}
+
+.joinBtn {
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #fff;
+}
+
+

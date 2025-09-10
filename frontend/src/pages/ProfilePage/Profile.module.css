@@ -26,12 +26,11 @@
 }
 
 .submitBtn {
-  width: 100%;
-  padding: 12px;
-  background-color: #2d3e50;
+  padding: 10px 16px;
+  background-color: #111827;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -39,4 +38,18 @@
   margin-bottom: 15px;
   color: green;
   font-weight: bold;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancelBtn {
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
 }

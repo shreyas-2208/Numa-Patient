@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ensureConsultationLink, fetchMyAppointments } from "../api/appointments";
+import styles from "./Dashboard.module.css";
 
 const Dashboard = () => {
   const [upcoming, setUpcoming] = useState(null);
@@ -42,30 +43,30 @@ const Dashboard = () => {
     }
   }
   return (
-    <div>
-      <h1>Welcome to Your Dashboard</h1>
-      <p>This is the main hub of your application where you can see key metrics and navigate to other sections.</p>
+    <div className={styles.wrap}>
+      <h1 className={styles.title}>Welcome to Your Dashboard</h1>
+      <p className={styles.desc}>This is the main hub of your application where you can see key metrics and navigate to other sections.</p>
 
-      <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-        <div style={{ flex: 1, padding: "20px", background: "#f5f5f5", borderRadius: "8px" }}>
+      <div className={styles.grid}>
+        <div className={styles.card}>
           <h3>Appointments</h3>
           {loading && <p>Loading...</p>}
-          {error && <p style={{ color: "#b00020" }}>{error}</p>}
+          {error && <p className={styles.error}>{error}</p>}
           {!loading && !upcoming && <p>No upcoming appointment.</p>}
           {!loading && upcoming && (
             <div>
               <p>
                 Upcoming: {new Date(upcoming.date).toLocaleDateString()} at {upcoming.time}
               </p>
-              <button onClick={handleJoin} style={{ padding: 8, cursor: "pointer" }}>Join</button>
+              <button onClick={handleJoin} className={styles.joinBtn}>Join</button>
             </div>
           )}
         </div>
-        <div style={{ flex: 1, padding: "20px", background: "#f5f5f5", borderRadius: "8px" }}>
+        <div className={styles.card}>
           <h3>Therapy Sessions</h3>
           <p>Track your therapy sessions and progress.</p>
         </div>
-        <div style={{ flex: 1, padding: "20px", background: "#f5f5f5", borderRadius: "8px" }}>
+        <div className={styles.card}>
           <h3>Resources</h3>
           <p>Access guides, articles, and other helpful resources.</p>
         </div>

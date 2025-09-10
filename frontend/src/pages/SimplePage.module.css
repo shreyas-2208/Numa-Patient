@@ -1,0 +1,20 @@
+.wrap {
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.title {
+  margin: 0 0 8px 0;
+}
+
+.desc {
+  color: #4b5563;
+}
+
+

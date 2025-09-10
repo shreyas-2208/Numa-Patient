@@ -1,0 +1,31 @@
+.wrap {
+  padding: 20px;
+}
+
+.title {
+  margin: 0 0 12px 0;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.cta {
+  margin-top: 20px;
+  padding: 10px 15px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #fff;
+}
+
+

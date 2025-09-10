@@ -1,0 +1,115 @@
+.container {
+  padding: 20px;
+}
+
+.title {
+  margin: 0 0 12px 0;
+  font-size: 22px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+}
+
+.dates {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.dateButton {
+  padding: 10px 8px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.dateButton:hover {
+  border-color: #9aa2af;
+}
+
+.dateButtonActive {
+  border: 2px solid #3f51b5;
+  background: #e8eaf6;
+}
+
+.slotsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.slotButton {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.slotButton:hover {
+  border-color: #9aa2af;
+}
+
+.slotButtonActive {
+  border: 2px solid #2e7d32;
+  background: #e8f5e9;
+}
+
+.actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 8px;
+}
+
+.primaryBtn {
+  padding: 10px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #fff;
+}
+
+.secondaryBtn {
+  padding: 10px 16px;
+  cursor: pointer;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.error {
+  color: #b00020;
+  margin-bottom: 12px;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import styles from "./PaymentReturn.module.css";
 
 function PaymentReturn() {
   const [searchParams] = useSearchParams();
@@ -27,9 +28,9 @@ function PaymentReturn() {
   }, [navigate, searchParams]);
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Payment</h2>
-      <p>{message}</p>
+    <div className={styles.wrap}>
+      <h2 className={styles.title}>Payment</h2>
+      <p className={styles.msg}>{message}</p>
     </div>
   );
 }

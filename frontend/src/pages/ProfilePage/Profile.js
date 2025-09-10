@@ -14,6 +14,8 @@ function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [initialProfile, setInitialProfile] = useState(null);
 
   const accessToken = localStorage.getItem("access_token");
 
@@ -27,6 +29,7 @@ function Profile() {
           },
         });
         setProfile(response.data);
+        setInitialProfile(response.data);
       } catch (err) {
         console.error("Error fetching profile:", err);
         setMessage("Failed to load profile.");
@@ -50,23 +53,40 @@ function Profile() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       setProfile(response.data);
+      setInitialProfile(response.data);
       setMessage("Profile updated successfully!");
+      setIsEditing(false);
     } catch (err) {
       console.error(err);
       setMessage("Failed to update profile.");
     }
   };
 
+  const handleCancel = () => {
+    setMessage("");
+    if (initialProfile) {
+      setProfile(initialProfile);
+    }
+    setIsEditing(false);
+  };
+
   if (loading) return <p>Loading profile...</p>;
 
   return (
     <div className={styles.container}>
-      <h2>My Profile</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h2>My Profile</h2>
+        {!isEditing && (
+          <button type="button" className={styles.submitBtn} onClick={() => setIsEditing(true)}>
+            Edit Profile
+          </button>
+        )}
+      </div>
       {message && <p className={styles.message}>{message}</p>}
       <form onSubmit={handleSubmit}>
         <div className={styles.field}>
           <label>Full Name</label>
-          <input type="text" name="full_name" value={profile.full_name} onChange={handleChange} />
+          <input type="text" name="full_name" value={profile.full_name} onChange={handleChange} disabled={!isEditing} />
         </div>
 
         <div className={styles.field}>
@@ -76,12 +96,12 @@ function Profile() {
 
         <div className={styles.field}>
           <label>Age</label>
-          <input type="number" name="age" value={profile.age || ""} onChange={handleChange} />
+          <input type="number" name="age" value={profile.age || ""} onChange={handleChange} disabled={!isEditing} />
         </div>
 
         <div className={styles.field}>
           <label>Gender</label>
-          <select name="gender" value={profile.gender || ""} onChange={handleChange}>
+          <select name="gender" value={profile.gender || ""} onChange={handleChange} disabled={!isEditing}>
             <option value="">Select gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -91,12 +111,19 @@ function Profile() {
 
         <div className={styles.field}>
           <label>Phone</label>
-          <input type="text" name="phone" value={profile.phone || ""} onChange={handleChange} />
+          <input type="text" name="phone" value={profile.phone || ""} onChange={handleChange} disabled={!isEditing} />
         </div>
 
-        <button type="submit" className={styles.submitBtn}>
-          Update Profile
-        </button>
+        {isEditing && (
+          <div className={styles.actionsRow}>
+            <button type="button" className={styles.cancelBtn} onClick={handleCancel}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.submitBtn}>
+              Save Changes
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

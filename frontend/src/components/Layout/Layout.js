@@ -3,15 +3,16 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../Sidebar/Sidebar";
 import Navbar from "../Navbar/Navbar";
+import styles from "./Layout.module.css"; // import CSS module
 
 const Layout = () => {
   return (
-    <div className="app">
+    <div className={styles.app}>
       <Sidebar />
-      <div className="main-content">
+      <div className={styles.mainContent}>
         <Navbar />
-        <div className="page-content">
-          <Outlet /> {/* 👈 this is where child routes (Dashboard, Appointments, etc.) render */}
+        <div className={styles.pageContent}>
+          <Outlet /> {/* This is where child routes render */}
         </div>
       </div>
     </div>

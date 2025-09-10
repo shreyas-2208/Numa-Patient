@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,8 +44,14 @@ INSTALLED_APPS = [
 
     # third-party
     "rest_framework",
+    "rest_framework.authtoken",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "corsheaders",
-
     # your apps
     "users",
     "doctors",
@@ -57,11 +65,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # custom supabase middleware (we will create)
+    "allauth.account.middleware.AccountMiddleware",
     "users.middleware.supabase_auth.SupabaseAuthMiddleware",
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -149,14 +159,19 @@ CORS_ALLOW_ALL_ORIGINS = True   # for dev only; restrict in prod
 # Celery / Redis
 REDIS_URL = config("REDIS_URL", default="redis://localhost:6379/0")
 
+REST_USE_JWT = True
+# REST_AUTH_TOKEN_MODEL = None  # disables DRF Token creation
+
 # Rest Framework (basic)
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",
+    ),
 }
+
 
 AUTH_USER_MODEL = config("AUTH_USER_MODEL", default="users.User")
 
@@ -164,3 +179,33 @@ ZOHO_MAIL_API_KEY = config("ZOHO_MAIL_API_KEY")
 ZOHO_SMS_API_KEY = config("ZOHO_SMS_API_KEY")
 ZOHO_CHECKOUT_PAGE_ID = config("ZOHO_CHECKOUT_PAGE_ID")
 ZOHO_API_KEY = config("ZOHO_API_KEY")
+
+REST_USE_JWT = True
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+SITE_ID = 1
+
+# Allauth settings for email-only login
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_SIGNUP_FIELDS = ["email", "username"]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["email", "profile"],
+        "APP": {
+            "client_id": config("GOOGLE_CLIENT_ID"),
+            "secret": config("GOOGLE_CLIENT_SECRET"),
+            "key": "",
+        },
+    }
+}

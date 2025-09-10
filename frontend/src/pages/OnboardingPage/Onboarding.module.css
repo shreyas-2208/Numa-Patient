@@ -1,0 +1,100 @@
+:root {
+  --primary: #4a90e2;
+  --bg: #ffffff;
+  --text: #1c1c1c;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --border: #e5e7eb;
+}
+
+/* Fade-in and fade-out animation for question box transitions */
+.fade-step.fade-in {
+  animation: fadeInStep 0.35s cubic-bezier(.4,2,.3,1);
+  opacity: 1;
+}
+.fade-step.fade-out {
+  animation: fadeOutStep 0.3s cubic-bezier(.4,2,.3,1);
+  opacity: 0;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeOutStep {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-16px) scale(0.98); }
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Container & card */
+.onboarding-container {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 24px;
+  background: linear-gradient(120deg, #e0e7ff 0%, #f7fbff 60%, #ffffff 100%);
+  animation: fadeInBg 1.2s ease;
+}
+
+@keyframes fadeInBg {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.onboarding-card {
+  background: rgba(255,255,255,0.85);
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(44, 62, 80, 0.13), 0 1.5px 6px rgba(44, 62, 80, 0.08);
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 540px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  transition: box-shadow 0.3s, transform 0.2s;
+  animation: cardPopIn 0.7s cubic-bezier(.4,2,.3,1);
+}
+
+@keyframes cardPopIn {
+  0% { transform: scale(0.97) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Headings, labels, hints */
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-weight: 600; font-size: 1.1rem; }
+.logo-dot { height: 14px; width: 14px; background: linear-gradient(135deg, #4a90e2 60%, #7cb8ff 100%); border-radius: 50%; box-shadow: 0 0 8px 2px #4a90e244; }
+.hint { color: var(--muted); font-size: 0.98rem; margin-bottom: 20px; font-style: italic; }
+h2 { font-size: 1.6rem; margin: 4px 0 14px; font-weight: 700; background: linear-gradient(90deg, #4a90e2 40%, #7cb8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* Input styles */
+.input-box { margin: 22px 0 10px; transition: box-shadow 0.2s; }
+label { display: block; font-size: 1rem; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+input, select, textarea { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #d1d5db; font-size: 1.04rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; background: #fff; box-shadow: 0 2px 8px rgba(74,144,226,0.04); }
+textarea { min-height: 92px; resize: vertical; }
+input:focus, select:focus, textarea:focus { border-color: #4a90e2; box-shadow: 0 0 0 6px rgba(74,144,226,0.18); }
+
+/* Buttons & nav */
+.nav { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+.btn { padding: 14px 20px; border: none; border-radius: 14px; background: linear-gradient(90deg, #4a90e2 60%, #7cb8ff 100%); color: white; font-size: 1.08rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(74,144,226,0.10); transition: transform 0.08s, background 0.3s, box-shadow 0.2s; }
+.btn:active { transform: scale(0.97); box-shadow: 0 1px 4px rgba(74,144,226,0.18); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn.secondary { background: #f3f4f6; color: #1f2937; box-shadow: none; }
+.btn.ghost { background: transparent; color: var(--muted); box-shadow: none; }
+
+/* Pills */
+.pills { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill { padding: 10px 16px; border-radius: 999px; border: 1.5px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; font-size: 1.02rem; font-weight: 500; box-shadow: 0 2px 8px rgba(74,144,226,0.04); transition: all 0.2s; }
+.pill:hover { background: #eaf4ff; color: #1f4bb8; border-color: #4a90e2; box-shadow: 0 4px 16px rgba(74,144,226,0.10); }
+.pill.active { border-color: #4a90e2; background: #eff6ff; color: #1f4bb8; box-shadow: 0 4px 16px rgba(74,144,226,0.13); }

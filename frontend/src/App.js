@@ -1,50 +1,54 @@
-// src/App.js
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-
-import Layout from "./components/Layout/Layout";
+import { Routes, Route, Navigate } from "react-router-dom";
+import AuthPage from "./pages/AuthPage";
+import Profile from "./pages/ProfilePage/Profile";
+import Onboarding from "./pages/OnboardingPage/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import Layout from "./components/Layout/Layout";
 import Appointments from "./pages/Appointments";
 import Therapy from "./pages/Therapy";
 import Resources from "./pages/Resources";
-import Profile from "./pages/Profile";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import "./App.css";
-
-// const isAuthenticated = () => localStorage.getItem("access") !== null;
 
 // const ProtectedRoute = ({ children }) => {
-//   return isAuthenticated() ? children : <Navigate to="/login" replace />;
+//   const isLoggedIn = !!localStorage.getItem("access_token");
+
+//   if (!isLoggedIn) {
+//     return <Navigate to="/auth" replace />;
+//   }
+
+//   return children;
 // };
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* Public routes
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} /> */}
 
-        {/* Protected with nested layout */}
-        <Route
-          path="/"
-          element={
-            // <ProtectedRoute>
-              <Layout />
-            // </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="therapy" element={<Therapy />} />
-          <Route path="resources" element={<Resources />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="register" element={<Register />} />
-          <Route path="login" element={<Login />} />
-        </Route>
-      </Routes>
-    </Router>
+  const isLoggedIn = !!localStorage.getItem("access_token");
+
+  return (
+      <Routes>
+      {/* Public routes */}
+      <Route
+        path="/"
+        element={isLoggedIn ? <Navigate to="/dashboard" /> : <AuthPage />}
+      />
+      <Route path="/auth" element={<AuthPage />} />
+
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route
+        element={
+          // <ProtectedRoute>
+            <Layout />
+          /* </ProtectedRoute> */
+        }
+      >
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/appointments" element={<Appointments />} />
+        <Route path="/therapy" element={<Therapy />} />
+        <Route path="/resources" element={<Resources />} />
+      </Route>
+
+      {/* Catch-all: redirect unknown routes */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 

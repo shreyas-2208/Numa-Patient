@@ -7,6 +7,8 @@ import Layout from "./components/Layout/Layout";
 import Appointments from "./pages/Appointments";
 import Therapy from "./pages/Therapy";
 import Resources from "./pages/Resources";
+import BookAppointment from "./pages/BookAppointment";
+import PaymentReturn from "./pages/PaymentReturn";
 
 // const ProtectedRoute = ({ children }) => {
 //   const isLoggedIn = !!localStorage.getItem("access_token");
@@ -42,6 +44,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/appointments/book" element={<BookAppointment />} />
+        <Route path="/payment/return" element={<PaymentReturn />} />
         <Route path="/therapy" element={<Therapy />} />
         <Route path="/resources" element={<Resources />} />
       </Route>

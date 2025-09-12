@@ -1,5 +1,7 @@
 # Node dependencies
 /node_modules
+/frontend/node_modules
+/backend/node_modules
 /.pnp
 .pnp.js
 
@@ -14,6 +16,8 @@ pnpm-debug.log*
 /dist
 /.next
 /out
+/frontend/build
+/backend/build
 
 # dotenv environment variables
 .env
@@ -21,6 +25,16 @@ pnpm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+/backend/.env
+/backend/.env.local
+/backend/.env.development.local
+/backend/.env.test.local
+/backend/.env.production.local
 
 # MacOS
 .DS_Store

@@ -1,0 +1,40 @@
+.sidebar {
+  width: 220px;
+  background: #2d3e50;
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.logo {
+  margin-bottom: 30px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  border-radius: 6px;
+}
+
+/* Style links inside sidebar */
+.sidebar a {
+  display: block;          /* make whole row clickable */
+  padding: 12px;
+  text-decoration: none;   /* remove underline */
+  color: white;            /* white text */
+  border-radius: 6px;
+}
+
+/* Hover effect */
+.sidebar a:hover {
+  background: #40566e;
+}
+
+/* Active page (from NavLink) */
+.sidebar a.active {
+  background: #1c2a38;
+  font-weight: bold;
+}

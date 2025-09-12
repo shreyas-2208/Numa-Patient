@@ -1,0 +1,35 @@
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.auth-container input {
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.auth-container button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.toggle-text {
+  color: #007bff;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.message {
+  color: green;
+  margin-top: 10px;
+}

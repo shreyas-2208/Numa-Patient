@@ -8,6 +8,8 @@ class Appointment(models.Model):
         ("pending", "Pending"),
         ("approved", "Approved"),
         ("cancelled", "Cancelled"),
+        ("completed", "Completed"),
+        ("rescheduled", "Rescheduled"),
     ]
 
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="appointments")

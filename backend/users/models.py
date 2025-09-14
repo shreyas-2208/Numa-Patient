@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from .managers import UserManager
+from doctors.models import Doctor
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)   # used for login
@@ -21,10 +22,16 @@ class PatientProfile(models.Model):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     dob = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, null=True, blank=True)
-    reason_for_visit = models.TextField(null=True, blank=True)
+    reason_for_visit = models.JSONField(default=list, null=True, blank=True)
     preferred_languages = models.JSONField(default=list, blank=True)  
     preferred_session_timings = models.JSONField(default=list, blank=True)  
     preferred_time_of_day = models.CharField(max_length=20, null=True, blank=True)
-
+    assigned_doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="patients"  
+    )
     def __str__(self):
         return f"{self.user.email} Profile"

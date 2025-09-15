@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchTwoWeekSlots, createAppointment } from "../api/appointments";
 import styles from "./BookAppointment.module.css";
@@ -47,26 +48,70 @@ function BookAppointment() {
     load();
   }, [calendarId, dates]);
 
-  async function handleContinueToPayment() {
-    if (!selectedDate || !selectedTime) {
-      setError("Please select a date and time.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      const { payment_url } = await createAppointment({ specialization, date: selectedDate, time: selectedTime });
-      if (payment_url) {
-        window.location.href = payment_url; // redirect to external checkout
-      } else {
-        setError("Could not initiate checkout. Please try again.");
-      }
-    } catch (e) {
-      setError("Could not create appointment. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+
+async function handleContinueToPayment() {
+  if (!selectedDate || !selectedTime) {
+    setError("Please select a date and time.");
+    return;
   }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    // 1. Create appointment first
+    const appointmentRes = await createAppointment({
+      specialization,
+      date: selectedDate,
+      time: selectedTime,
+    });
+
+    const appointmentId = appointmentRes.id; // backend should return appointment id
+
+    // 2. Create Razorpay order for this appointment
+    const { data } = await axios.post(
+      `http://localhost:8000/api/payments/create-order/${appointmentId}/`,
+      {},
+      { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+    );
+
+    // 3. Configure Razorpay Checkout
+    const options = {
+      key: data.razorpay_key,
+      amount: data.amount * 100,
+      currency: data.currency,
+      order_id: data.order_id,
+      handler: async function (response) {
+        try {
+          await axios.post(
+            "http://localhost:8000/api/payments/verify-payment/",
+            {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            },
+            { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+          );
+          alert("✅ Payment successful & appointment confirmed!");
+          navigate("/appointments"); // redirect to confirmation page
+        } catch (verifyErr) {
+          console.error("Verification failed", verifyErr);
+          alert("⚠️ Payment verification failed. Please contact support.");
+        }
+      },
+      theme: { color: "#3399cc" },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    console.error("Payment initiation failed", err);
+    setError("Something went wrong while starting payment.");
+  } finally {
+    setLoading(false);
+  }
+}
+
 
   return (
     <div className={styles.container}>

@@ -30,7 +30,8 @@ def list_events(request, calendar_id):
 
 @api_view(["GET"])
 def free_slots(request, calendar_id):
-    date = request.GET.get("date")  # format YYYY-MM-DD
+    # date = request.GET.get("date") \
+    date = "2025-09-17"  # format YYYY-MM-DD
     if not date:
         return Response({"error": "Missing 'date' query param"}, status=400)
     try:

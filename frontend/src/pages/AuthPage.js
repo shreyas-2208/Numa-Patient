@@ -36,15 +36,14 @@ const AuthPage = () => {
         const payload = {
         //   username: registerForm.username,
           email: registerForm.email,
-          password: registerForm.password1, // backend expects `password`
+          password: registerForm.password1,
         };        
 
         res = await register(payload);
-        // Save access token
+
         localStorage.setItem("access_token", res.data.access);
         localStorage.setItem("refresh_token", res.data.refresh);
 
-        // Redirect to onboarding for all new users
         navigate("/onboarding");
       } else {
         // Login existing user
@@ -71,10 +70,10 @@ const AuthPage = () => {
   const handleGoogleLogin = async (credentialResponse) => {
     try {
       const res = await googleLogin(credentialResponse.credential);
-        localStorage.setItem("access_token", res.access);
-        localStorage.setItem("refresh_token", res.refresh);
-    //   localStorage.setItem("access_token", res.access || res.key);
-      setMessage("Google login success! Redirecting...");
+      localStorage.setItem("access_token", res.access);
+      localStorage.setItem("refresh_token", res.refresh);
+
+        setMessage("Google login success! Redirecting...");
       navigate("/dashboard");
     } catch (err) {
       setMessage("Google login failed");

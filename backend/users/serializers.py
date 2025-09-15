@@ -73,7 +73,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     name=serializers.CharField(source="user.username", read_only=True)
     class Meta:
         model = PatientProfile
-        fields = ["name", "email", "age", "dob", "gender"]
+        fields = ["name", "email", "age", "dob", "gender", "phone_number", "assigned_doctor"]
 
     def get_age(self, obj):
         if obj.dob:

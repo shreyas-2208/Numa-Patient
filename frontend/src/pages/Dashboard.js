@@ -19,7 +19,7 @@ const Dashboard = () => {
           dt: new Date(`${a.date}T${a.time}`),
         }));
         const upcomingSorted = items
-          .filter((a) => a.dt >= now && a.status !== "cancelled")
+          .filter((a) => a.dt >= now && a.status === "scheduled")
           .sort((a, b) => a.dt - b.dt);
         setUpcoming(upcomingSorted[0] || null);
       } catch (e) {

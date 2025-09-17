@@ -95,7 +95,7 @@ class CreateOrderForAppointmentView(APIView):
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        amount = 50  # Example fixed consultation fee
+        amount = 10  # Example fixed consultation fee
         currency = "INR"
 
         order = razorpay_client.order.create({
@@ -109,7 +109,7 @@ class CreateOrderForAppointmentView(APIView):
             appointment=appointment,
             amount=amount,
             currency=currency,
-            status="created",
+            status="initiated",
             razorpay_order_id=order["id"]
         )
 
@@ -146,14 +146,14 @@ class VerifyPaymentView(APIView):
             return Response({"error": "Signature verification failed"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Mark payment as successful
-        payment.status = "paid"
+        payment.status = "successful"
         payment.razorpay_payment_id = razorpay_payment_id
         payment.razorpay_signature = razorpay_signature
         payment.save()
 
         # Update appointment
         appointment = payment.appointment
-        appointment.status = "confirmed"
+        appointment.status = "scheduled"
         appointment.save()
 
         return Response({"success": True, "message": "Payment verified and appointment confirmed"})

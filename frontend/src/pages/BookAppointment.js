@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchTwoWeekSlots, createAppointment } from "../api/appointments";
+import { fetchSlotsForRange, createAppointment } from "../api/appointments";
 import styles from "./BookAppointment.module.css";
 
 function formatDateLabel(dateStr) {
@@ -22,31 +22,38 @@ function BookAppointment() {
   const [selectedTime, setSelectedTime] = useState("");
 
   const dates = useMemo(() => {
-    const start = new Date();
-    return Array.from({ length: 14 }).map((_, i) => {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      return d.toISOString().slice(0, 10);
-    });
-  }, []);
+  const start = new Date();
+  return Array.from({ length: 14 }).map((_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  });
+}, []);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      setError("");
-      try {
-        const data = await fetchTwoWeekSlots(calendarId);
-        setSlotsByDate(data || {});
-        const firstDateWithSlots = dates.find((d) => (data?.[d] || []).length > 0) || dates[0];
-        setSelectedDate(firstDateWithSlots);
-      } catch (e) {
-        setError("Failed to load available slots. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+useEffect(() => {
+  async function load() {
+    setLoading(true);
+    setError("");
+    try {
+      // Fetch slots for the full range in one call
+      const data = await fetchSlotsForRange(calendarId, dates[0], 14);
+
+      setSlotsByDate(data || {});
+
+      // pick the first date with available slots, else fallback to first date
+      const firstDateWithSlots =
+        dates.find((d) => (data?.[d] || []).length > 0) || dates[0];
+      setSelectedDate(firstDateWithSlots);
+    } catch (e) {
+      console.error("Error loading slots:", e);
+      setError("Failed to load available slots. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    load();
-  }, [calendarId, dates]);
+  }
+  load();
+}, [calendarId, dates]);
+
 
 
 async function handleContinueToPayment() {
@@ -66,7 +73,7 @@ async function handleContinueToPayment() {
       time: selectedTime,
     });
 
-    const appointmentId = appointmentRes.id; // backend should return appointment id
+    const appointmentId = appointmentRes.appointment.id; // backend should return appointment id
 
     // 2. Create Razorpay order for this appointment
     const { data } = await axios.post(

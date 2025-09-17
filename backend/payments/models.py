@@ -7,7 +7,7 @@ from appointments.models import Appointment
 class Payment(models.Model):
     STATUS_CHOICES = [
         ("initiated", "Initiated"),
-        ("success", "Success"),
+        ("successful", "Successful"),
         ("failed", "Failed"),
     ]
 

@@ -7,6 +7,7 @@ class Appointment(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending"),
         ("approved", "Approved"),
+        ("scheduled", "Scheduled"),
         ("cancelled", "Cancelled"),
         ("completed", "Completed"),
         ("rescheduled", "Rescheduled"),

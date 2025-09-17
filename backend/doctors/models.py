@@ -28,7 +28,7 @@ class Doctor(models.Model):
     bio = models.TextField()
     calendar_id = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=10)
-    email = models.EmailField()
+    email = models.EmailField(default="")
     staff_id = models.CharField(max_length=100, null=True, blank=True)
 
 

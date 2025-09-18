@@ -45,11 +45,12 @@ export const fetchSlotsForRange = async (calendarId, startDate) => {
 };
 
 // Create appointment and receive payment link
-export const createAppointment = async ({ specialization, date, time }) => {
+export const createAppointment = async ({ specialization, date, time, plan_id }) => {
   const response = await axios.post(`/api/appointments/create/`, {
     specialization,
     date,
     time,
+    plan_id,
   });
   return response.data; // { appointment, payment_url }
 };

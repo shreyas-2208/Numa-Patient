@@ -95,11 +95,24 @@ class CreateOrderForAppointmentView(APIView):
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        amount = 10  # Example fixed consultation fee
+        # Get amount and validate it
+        amount = request.data.get("amount")
+        if not amount:
+            return Response({"error": "Amount is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Convert to float first, then to int to handle decimal amounts
+        try:
+            amount_float = float(amount)
+            if amount_float <= 0:
+                return Response({"error": "Amount must be greater than 0"}, status=status.HTTP_400_BAD_REQUEST)
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid amount format"}, status=status.HTTP_400_BAD_REQUEST)
+        
         currency = "INR"
 
+        # Create Razorpay order with amount in paise (multiply by 100)
         order = razorpay_client.order.create({
-            "amount": int(amount * 100),  # in paise
+            "amount": int(amount_float * 100), 
             "currency": currency,
             "payment_capture": 1
         })
@@ -107,7 +120,7 @@ class CreateOrderForAppointmentView(APIView):
         payment = Payment.objects.create(
             user=request.user,
             appointment=appointment,
-            amount=amount,
+            amount=amount_float,  # Store the original amount
             currency=currency,
             status="initiated",
             razorpay_order_id=order["id"]
@@ -115,7 +128,7 @@ class CreateOrderForAppointmentView(APIView):
 
         return Response({
             "order_id": order["id"],
-            "amount": amount,
+            "amount": amount_float,
             "currency": currency,
             "payment_id": payment.id,
             "razorpay_key": settings.RAZORPAY_KEY_ID
@@ -157,3 +170,28 @@ class VerifyPaymentView(APIView):
         appointment.save()
 
         return Response({"success": True, "message": "Payment verified and appointment confirmed"})
+
+
+class CancelPaymentView(APIView):
+    def post(self, request, appointment_id):
+        try:
+            appointment = Appointment.objects.get(id=appointment_id, patient=request.user)
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Update appointment status to cancelled
+        appointment.status = "cancelled"
+        appointment.save()
+
+        # Update payment status if exists
+        try:
+            payment = Payment.objects.get(appointment=appointment, user=request.user)
+            payment.status = "cancelled"
+            payment.save()
+        except Payment.DoesNotExist:
+            pass  # No payment record exists yet
+
+        return Response({
+            "success": True, 
+            "message": "Payment cancelled and appointment status updated"
+        })

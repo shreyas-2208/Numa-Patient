@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchSlotsForRange, createAppointment } from "../api/appointments";
+import { fetchSessionPlans } from "../api/plans";
 import styles from "./BookAppointment.module.css";
+import PlanSelector from "../components/PlanSelector/PlanSelector";
 
 function formatDateLabel(dateStr) {
   const d = new Date(dateStr);
@@ -12,7 +14,7 @@ function formatDateLabel(dateStr) {
 function BookAppointment() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const calendarId = searchParams.get("calendarId") || "primary"; // fallback
+  const calendarId = searchParams.get("calendarId") || "primary"; 
   const specialization = searchParams.get("specialization") || "General";
 
   const [loading, setLoading] = useState(false);
@@ -20,6 +22,9 @@ function BookAppointment() {
   const [slotsByDate, setSlotsByDate] = useState({});
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [plans, setPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
 
   const dates = useMemo(() => {
   const start = new Date();
@@ -54,11 +59,48 @@ useEffect(() => {
   load();
 }, [calendarId, dates]);
 
+useEffect(() => {
+    async function loadPlans() {
+      try {
+        const plansData = await fetchSessionPlans(specialization);
+        setPlans(plansData);
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+        setError("Failed to load available plans. Please try again.");
+      }
+    }
+    loadPlans();
+  }, [specialization]);
 
+async function handlePaymentCancellation() {
+  setLoading(false);
+  setError("Payment was cancelled. You can try again or select a different plan.");
+  
+  // Call backend to update appointment status to cancelled
+  try {
+    if (currentAppointmentId) {
+      await axios.post(
+        `http://localhost:8000/api/payments/cancel-payment/${currentAppointmentId}/`,
+        {},
+        { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+      );
+    }
+  } catch (err) {
+    console.error("Error updating cancelled payment status:", err);
+  }
+  
+  // Optional: Reset selected plan to allow user to change their selection
+  // setSelectedPlan(null);
+}
 
 async function handleContinueToPayment() {
   if (!selectedDate || !selectedTime) {
     setError("Please select a date and time.");
+    return;
+  }
+
+  if (!selectedPlan) {
+    setError("Please select a plan before proceeding to payment.");
     return;
   }
 
@@ -71,14 +113,27 @@ async function handleContinueToPayment() {
       specialization,
       date: selectedDate,
       time: selectedTime,
+      plan_id: selectedPlan.id, // Include the selected plan ID
     });
 
     const appointmentId = appointmentRes.appointment.id; // backend should return appointment id
+    setCurrentAppointmentId(appointmentId); // Store for cancellation handling
 
-    // 2. Create Razorpay order for this appointment
+    // 2. Create Razorpay order for this appointment with plan price
+    const amount = parseFloat(selectedPlan.price);
+    if (isNaN(amount)) {
+      setError("Invalid plan price. Please select a different plan.");
+      return;
+    }
+    
+    const requestData = {
+      plan_id: selectedPlan.id,
+      amount: amount, // Use the parsed plan's price
+    };
+    
     const { data } = await axios.post(
       `http://localhost:8000/api/payments/create-order/${appointmentId}/`,
-      {},
+      requestData,
       { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
     );
 
@@ -106,10 +161,21 @@ async function handleContinueToPayment() {
           alert("⚠️ Payment verification failed. Please contact support.");
         }
       },
+      modal: {
+        ondismiss: function() {
+          handlePaymentCancellation();
+        }
+      },
       theme: { color: "#3399cc" },
     };
 
     const rzp = new window.Razorpay(options);
+    
+    // Handle payment failure
+    rzp.on('payment.failed', function (response) {
+      handlePaymentCancellation();
+    });
+    
     rzp.open();
   } catch (err) {
     console.error("Payment initiation failed", err);
@@ -166,10 +232,29 @@ async function handleContinueToPayment() {
             })}
           </div>
 
+          {selectedDate && selectedTime && (
+        <PlanSelector
+          plans={plans}
+          selectedPlan={selectedPlan}
+          onSelectPlan={setSelectedPlan}
+        />
+      )}
+
+      {selectedPlan && (
+        <div className={styles.selectedPlanSummary}>
+          <h4>Selected Plan</h4>
+          <div className={styles.planSummary}>
+            <span className={styles.planName}>{selectedPlan.title}</span>
+            <span className={styles.planDuration}>{selectedPlan.duration_minutes} min</span>
+            <span className={styles.planPrice}>₹{selectedPlan.price.toLocaleString()}</span>
+          </div>
+        </div>
+      )}
+
           <div className={styles.actions}>
             <button
               onClick={handleContinueToPayment}
-              disabled={loading || !selectedDate || !selectedTime}
+              disabled={loading || !selectedDate || !selectedTime || !selectedPlan}
               className={styles.primaryBtn}
             >
               Continue to Payment

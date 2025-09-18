@@ -6,6 +6,7 @@ from plans.models import PackagePlan, SessionPlan  # import Package and PackageD
 class Appointment(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending"),
+        ("payment_failed", "Payment Failed"),
         ("approved", "Approved"),
         ("scheduled", "Scheduled"),
         ("cancelled", "Cancelled"),

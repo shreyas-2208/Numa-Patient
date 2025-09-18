@@ -145,7 +145,7 @@ useEffect(() => {
     loadDraft();
   }, []);
   
-  const totalSteps = 12; // steps 0..11
+  const totalSteps = 13; // steps 0..12
   const progressPct = ((step) / (totalSteps - 1)) * 100;
 
   const slots = useMemo(() => form.doctor ? DUMMY_SLOTS(form.doctor.id) : [], [form.doctor]);
@@ -212,18 +212,20 @@ useEffect(() => {
 };
 
   const canNext = () => {
+    const isValidPhone = (v) => /^\d{10}$/.test(String(v || "").replace(/\D/g, ""));
     switch (step) {
       case 0: return true;
-      case 1: return form.username.trim().length > 1;
-      case 2: return !!form.dob && !!form.ageGroup;
-      case 3: return !!form.gender;
-      case 4: return !!form.city;
-      case 5: return !!form.preferred_languages;
-      case 6: return form.reason_for_visit.length > 0;
-      case 7: return !!form.preferred_session_timings;
-      case 8: return !!form.preferred_time_of_day;
-      case 9: return !!form.package;
-      case 10: return !!form.slotId;
+      case 1: return form.username.trim().length > 1; // name
+      case 2: return isValidPhone(form.phone_number); // phone
+      case 3: return !!form.dob && !!form.ageGroup; // dob
+      case 4: return !!form.gender;
+      case 5: return !!form.city;
+      case 6: return !!form.preferred_languages;
+      case 7: return form.reason_for_visit.length > 0;
+      case 8: return !!form.preferred_session_timings;
+      case 9: return !!form.preferred_time_of_day;
+      case 10: return !!form.package;
+      case 11: return !!form.slotId;
       default: return true;
     }
   };
@@ -264,11 +266,37 @@ useEffect(() => {
 
         {step === 2 && (
           <>
+            <h2>Enter your phone number</h2>
+            <p className="hint">We'll use this for appointment updates and reminders.</p>
+            <div className="input-box">
+              <label>Phone</label>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ padding: "10px 12px", border: "1px solid #e5e7eb", borderRadius: 8, background: "#f9fafb" }}>+91</span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="10-digit number"
+                  value={form.phone_number || ""}
+                  onChange={e => setField("phone_number", e.target.value.replace(/\D/g, ""))}
+                />
+              </div>
+              <div className="small" style={{ marginTop: 6, color: "#6b7280" }}>Only digits. No spaces or dashes.</div>
+            </div>
+            <div className="nav">
+              <button className="btn secondary" onClick={back}>Back</button>
+              <button className="btn" onClick={next} disabled={!canNext()}>Next</button>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
             <h2>Date of birth</h2>
             <p className="hint">Age group will be inferred automatically.</p>
             <div className="input-box">
               <label>DOB</label>
-              <input type="date" value={form.dob} onChange={e => handleDOB(e.target.value)} />
+              <input type="date" value={form.dob || ""} onChange={e => handleDOB(e.target.value)} />
             </div>
             {form.ageGroup && <p className="small">Detected age group: <strong>{form.ageGroup}</strong></p>}
             <div className="nav">
@@ -278,7 +306,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <h2>Gender</h2>
             <p className="hint">Optional, used to improve care matching.</p>
@@ -298,7 +326,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <h2>City / Location</h2>
             <p className="hint">Choose an Indian city or Outside India.</p>
@@ -315,7 +343,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <>
             <h2>Preferred language</h2>
             <p className="hint">Pick the language most comfortable for sessions.</p>
@@ -331,7 +359,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 6 && (
+        {step === 7 && (
           <>
             <h2>What brings you here?</h2>
             <p className="hint">Select one or more that best describe the concern.</p>
@@ -356,7 +384,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 7 && (
+        {step === 8 && (
           <>
             <h2>Session days</h2>
             <p className="hint">When are sessions preferred?</p>
@@ -374,7 +402,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 8 && (
+        {step === 9 && (
           <>
             <h2>Time of day</h2>
             <p className="hint">Choose a preferred time window.</p>
@@ -392,7 +420,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 9 && (
+        {step === 10 && (
           <>
             <h2>Assigned clinician</h2>
             <p className="hint">Matched by preference and age group.</p>
@@ -428,7 +456,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 10 && (
+        {step === 11 && (
           <>
             <h2>First session slot</h2>
             <p className="hint">Choose a slot in the next 2 weeks.</p>
@@ -460,7 +488,7 @@ useEffect(() => {
           </>
         )}
 
-        {step === 11 && (
+        {step === 12 && (
           <>
             <h2>Booking confirmed</h2>
             <p className="hint">Payment successful. Session scheduled.</p>

@@ -24,7 +24,6 @@ function BookAppointment() {
   const [selectedTime, setSelectedTime] = useState("");
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
 
   const dates = useMemo(() => {
   const start = new Date();
@@ -72,26 +71,6 @@ useEffect(() => {
     loadPlans();
   }, [specialization]);
 
-async function handlePaymentCancellation() {
-  setLoading(false);
-  setError("Payment was cancelled. You can try again or select a different plan.");
-  
-  // Call backend to update appointment status to cancelled
-  try {
-    if (currentAppointmentId) {
-      await axios.post(
-        `http://localhost:8000/api/payments/cancel-payment/${currentAppointmentId}/`,
-        {},
-        { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
-      );
-    }
-  } catch (err) {
-    console.error("Error updating cancelled payment status:", err);
-  }
-  
-  // Optional: Reset selected plan to allow user to change their selection
-  // setSelectedPlan(null);
-}
 
 async function handleContinueToPayment() {
   if (!selectedDate || !selectedTime) {
@@ -117,7 +96,6 @@ async function handleContinueToPayment() {
     });
 
     const appointmentId = appointmentRes.appointment.id; // backend should return appointment id
-    setCurrentAppointmentId(appointmentId); // Store for cancellation handling
 
     // 2. Create Razorpay order for this appointment with plan price
     const amount = parseFloat(selectedPlan.price);
@@ -161,21 +139,10 @@ async function handleContinueToPayment() {
           alert("⚠️ Payment verification failed. Please contact support.");
         }
       },
-      modal: {
-        ondismiss: function() {
-          handlePaymentCancellation();
-        }
-      },
       theme: { color: "#3399cc" },
     };
 
     const rzp = new window.Razorpay(options);
-    
-    // Handle payment failure
-    rzp.on('payment.failed', function (response) {
-      handlePaymentCancellation();
-    });
-    
     rzp.open();
   } catch (err) {
     console.error("Payment initiation failed", err);

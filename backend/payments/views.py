@@ -170,28 +170,3 @@ class VerifyPaymentView(APIView):
         appointment.save()
 
         return Response({"success": True, "message": "Payment verified and appointment confirmed"})
-
-
-class CancelPaymentView(APIView):
-    def post(self, request, appointment_id):
-        try:
-            appointment = Appointment.objects.get(id=appointment_id, patient=request.user)
-        except Appointment.DoesNotExist:
-            return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Update appointment status to cancelled
-        appointment.status = "cancelled"
-        appointment.save()
-
-        # Update payment status if exists
-        try:
-            payment = Payment.objects.get(appointment=appointment, user=request.user)
-            payment.status = "cancelled"
-            payment.save()
-        except Payment.DoesNotExist:
-            pass  # No payment record exists yet
-
-        return Response({
-            "success": True, 
-            "message": "Payment cancelled and appointment status updated"
-        })

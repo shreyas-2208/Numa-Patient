@@ -23,18 +23,19 @@ def list_events(request, calendar_id):
     from_date = request.GET.get("from")
     to_date = request.GET.get("to")
     try:
-        events = calendar.get_events(calendar_id, from_date=from_date, to_date=to_date)
+        events = calendar.get_events_for_range(calendar_id, from_date=from_date, to_date=to_date)
         return Response({"events": events})
     except Exception as e:
         return Response({"error": str(e)}, status=400)
 
 @api_view(["GET"])
-def free_slots(request, calendar_id):
-    date = request.GET.get("date")  # format YYYY-MM-DD
-    if not date:
-        return Response({"error": "Missing 'date' query param"}, status=400)
+def free_slots(request, calendar_id, date=None):
+    # date = request.GET.get("date") \
+    # date = "2025-09-17"  # format YYYY-MM-DD
+    # if not date:
+    #     return Response({"error": "Missing 'date' query param"}, status=400)
     try:
-        slots = calendar.get_free_slots(calendar_id, date)
-        return Response({"date": date, "slots": slots})
+        slots = calendar.get_free_slots_for_range(calendar_id, date)
+        return Response({"slots": slots})
     except Exception as e:
         return Response({"error": str(e)}, status=400)

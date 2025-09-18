@@ -110,7 +110,7 @@ function Profile() {
         </div>
 
         <div className={styles.field}>
-          <label>Phone</label>
+          <label>Phone Number</label>
           <input type="text" name="phone" value={profile.phone || ""} onChange={handleChange} disabled={!isEditing} />
         </div>
 

@@ -10,7 +10,7 @@ export const fetchFreeSlotsForDate = async (calendarId, date) => {
 };
 
 // Fetch free slots for a range of days ahead (iterate dates on client)
-export const fetchTwoWeekSlots = async (calendarId, startDate) => {
+export const  fetchTwoWeekSlots = async (calendarId, startDate) => {
   const start = startDate ? new Date(startDate) : new Date();
   const requests = [];
   for (let i = 0; i < 14; i += 1) {
@@ -36,12 +36,21 @@ export const fetchTwoWeekSlots = async (calendarId, startDate) => {
   return map;
 };
 
+export const fetchSlotsForRange = async (calendarId, startDate) => {
+  const response = await axios.get(`/api/zoho/calendars/${calendarId}/free-slots/`, {
+    params: { start_date: startDate },
+  });
+
+  return response.data.slots || {};
+};
+
 // Create appointment and receive payment link
-export const createAppointment = async ({ specialization, date, time }) => {
+export const createAppointment = async ({ specialization, date, time, plan_id }) => {
   const response = await axios.post(`/api/appointments/create/`, {
     specialization,
     date,
     time,
+    plan_id,
   });
   return response.data; // { appointment, payment_url }
 };

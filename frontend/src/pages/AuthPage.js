@@ -73,8 +73,13 @@ const AuthPage = () => {
       localStorage.setItem("access_token", res.access);
       localStorage.setItem("refresh_token", res.refresh);
 
-        setMessage("Google login success! Redirecting...");
-      navigate("/dashboard");
+      setMessage("Google login success! Redirecting...");
+
+      if(res.is_new_user) {
+        navigate("/onboarding");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setMessage("Google login failed");
       console.error(err);

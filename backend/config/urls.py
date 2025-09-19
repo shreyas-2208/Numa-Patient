@@ -39,4 +39,5 @@ urlpatterns = [
     path("api/payments/", include("payments.urls")),
     path("api/zoho/", include("zoho.urls")),
     path("api/plans/", include("plans.urls")), 
+    path("api/bookings/", include("bookings.urls")),
 ]

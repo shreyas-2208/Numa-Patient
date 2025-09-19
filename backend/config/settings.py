@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "consultations",
     "zoho",
     "plans",
+    "bookings"
 ]
 
 MIDDLEWARE = [

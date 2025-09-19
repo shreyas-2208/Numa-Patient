@@ -8,25 +8,25 @@ from .models import Appointment
 ZOHO_API_URL = "https://calendar.zoho.com/api/v1/calendars/{calendar_id}/events"
 ZOHO_ACCESS_TOKEN = config("ZOHO_ACCESS_TOKEN")
 
-def assign_doctor(specialization, date, time):
-    """
-    Assign a doctor for a given specialization, date, and time.
-    """
-    doctors = Doctor.objects.filter(specialization=specialization)
+# def assign_doctor(specialization, date, time):
+#     """
+#     Assign a doctor for a given specialization, date, and time.
+#     """
+#     doctors = Doctor.objects.filter(specialization=specialization)
 
-    for doctor in doctors:
-        # Check if time is within doctor's working hours
-        if not (doctor.available_from <= time <= doctor.available_to):
-            continue
+#     for doctor in doctors:
+#         # Check if time is within doctor's working hours
+#         if not (doctor.available_from <= time <= doctor.available_to):
+#             continue
 
-        # Check for conflicting appointments in Django DB
-        conflict = Appointment.objects.filter(doctor=doctor, date=date, time=time).exists()
-        if conflict:
-            continue
+#         # Check for conflicting appointments in Django DB
+#         conflict = Appointment.objects.filter(doctor=doctor, date=date, time=time).exists()
+#         if conflict:
+#             continue
 
-        return doctor
+#         return doctor
 
-    return None  
+#     return None  
 
 
 def get_free_slots(calendar_id, specialization, days_ahead=3, available_from="09:00", available_to="17:00"):

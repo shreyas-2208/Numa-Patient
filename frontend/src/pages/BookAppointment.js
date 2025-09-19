@@ -132,6 +132,13 @@ async function handleContinueToPayment() {
             },
             { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
           );
+
+          await axios.post(
+        "http://localhost:8000/api/bookings/create/",
+        { appointment_id: appointmentId }, // pass the appointment ID created earlier
+        { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+      );
+
           alert("✅ Payment successful & appointment confirmed!");
           navigate("/appointments"); // redirect to confirmation page
         } catch (verifyErr) {

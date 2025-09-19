@@ -19,6 +19,7 @@ class User(AbstractUser):
 
 class PatientProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    name = models.CharField(max_length=150, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     dob = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, null=True, blank=True)

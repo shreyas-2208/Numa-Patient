@@ -38,6 +38,38 @@ class LoginView(APIView):
             "access": str(refresh.access_token),
         })
 
+class GoogleLoginView(APIView):
+        permission_classes = [AllowAny]
+
+        def post(self, request):
+            token = request.data.get("token") 
+            try:
+                # Verify with Google
+                idinfo = id_token.verify_oauth2_token(
+                    token, 
+                    requests.Request(),
+                    GOOGLE_CLIENT_ID
+                    )
+
+                email = idinfo["email"]
+                name = idinfo["name"]
+
+                # Create or get user
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={"username": name}
+                )
+
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "user": {"email": user.email, "username": user.username},
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "is_new_user": created
+                })
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 # Profile view
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -62,33 +94,3 @@ class PatientOnboardingView(generics.RetrieveUpdateAPIView):
         obj, created = PatientProfile.objects.get_or_create(user=self.request.user)
         return obj    
 
-class GoogleLoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        token = request.data.get("token") 
-        try:
-            # Verify with Google
-            idinfo = id_token.verify_oauth2_token(
-                token, 
-                requests.Request(),
-                GOOGLE_CLIENT_ID
-                )
-
-            email = idinfo["email"]
-            name = idinfo["name"]
-
-            # Create or get user
-            user, _ = User.objects.get_or_create(
-                email=email,
-                defaults={"username": name}
-            )
-
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                "user": {"email": user.email, "username": user.username},
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            })
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

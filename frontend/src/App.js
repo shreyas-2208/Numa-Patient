@@ -9,36 +9,28 @@ import Therapy from "./pages/Therapy";
 import Resources from "./pages/Resources";
 import BookAppointment from "./pages/BookAppointment";
 import PaymentReturn from "./pages/PaymentReturn";
-
-// const ProtectedRoute = ({ children }) => {
-//   const isLoggedIn = !!localStorage.getItem("access_token");
-
-//   if (!isLoggedIn) {
-//     return <Navigate to="/auth" replace />;
-//   }
-
-//   return children;
-// };
+import ProtectedRoute from "./components/ProtectedRoute";
+import { isTokenValid } from "./utils/auth";
 
 function App() {
-
-  const isLoggedIn = !!localStorage.getItem("access_token");
+  const isLoggedIn = isTokenValid();
 
   return (
-      <Routes>
+    <Routes>
       {/* Public routes */}
       <Route
         path="/"
         element={isLoggedIn ? <Navigate to="/dashboard" /> : <AuthPage />}
       />
       <Route path="/auth" element={<AuthPage />} />
-
       <Route path="/onboarding" element={<Onboarding />} />
+
+      {/* Protected routes */}
       <Route
         element={
-          // <ProtectedRoute>
+          <ProtectedRoute>
             <Layout />
-          /* </ProtectedRoute> */
+          </ProtectedRoute>
         }
       >
         <Route path="/profile" element={<Profile />} />
@@ -50,7 +42,7 @@ function App() {
         <Route path="/resources" element={<Resources />} />
       </Route>
 
-      {/* Catch-all: redirect unknown routes */}
+      {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

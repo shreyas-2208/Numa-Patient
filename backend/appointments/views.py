@@ -5,10 +5,8 @@ from django.shortcuts import get_object_or_404
 
 from .models import Appointment
 from .serializers import AppointmentSerializer
-from .services import assign_doctor
 from plans.models import SessionPlan, PackagePlan
 from payments.models import Payment
-from payments.services import create_payment_link
 from notifications.services import send_email_notification, send_sms_notification
 
 class AppointmentCreateView(generics.CreateAPIView):

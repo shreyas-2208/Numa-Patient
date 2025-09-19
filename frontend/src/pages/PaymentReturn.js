@@ -9,6 +9,7 @@ function PaymentReturn() {
   const [message, setMessage] = useState("Verifying payment...");
 
   useEffect(() => {
+
     // In many payment providers, you'll get params like status and reference ids.
     // Backend webhook finalizes the appointment and sends notifications.
     const s = searchParams.get("status");

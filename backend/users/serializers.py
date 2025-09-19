@@ -29,34 +29,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             "refresh": str(refresh),
         }
 
-# class RegisterSerializer(serializers.ModelSerializer):
-#     dob = serializers.DateField(required=False)
-#     gender = serializers.ChoiceField(choices=[("M", "Male"), ("F", "Female"), ("O", "Other")], required=False)
-#     password = serializers.CharField(write_only=True)
-
-#     class Meta:
-#         model = User
-#         fields = ["email", "username", "gender", "dob", "phone_number", "password"]
-
-#     def create(self, validated_data):
-#         dob = validated_data.pop("dob", None)       
-#         gender = validated_data.pop("gender", None)
-                                    
-#         user = User.objects.create_user(
-#             email=validated_data["email"],
-#             username=validated_data["username"],
-#             phone_number=validated_data.get("phone_number"),
-#             password=validated_data["password"]
-#         )
-        
-#         PatientProfile.objects.create(
-#             user=user,
-#             dob=dob,
-#             gender=gender,
-#         )        
-        
-#         return user
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)

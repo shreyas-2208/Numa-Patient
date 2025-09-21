@@ -339,14 +339,14 @@ export default function Onboarding() {
   };
 
   // Save draft and exit from package step onwards
-  const finishLater = async () => {
-    try {
-      await saveDraft(); // save current form to backend
-    } catch (err) {
-      console.error("Failed to save draft:", err);
-    }
-    goToDashboard(); // actually call the function to navigate
-  };
+  // const finishLater = async () => {
+  //   try {
+  //     await saveDraft(); // save current form to backend
+  //   } catch (err) {
+  //     console.error("Failed to save draft:", err);
+  //   }
+  //   goToDashboard(); // actually call the function to navigate
+  // };
 
   const canNext = () => {
     const isValidPhone = (v) =>
@@ -418,42 +418,41 @@ export default function Onboarding() {
         )}
 
         {viewStep === 1 && (
-          <>
-            <h2>What's your name?</h2>
-            <p className="hint">This helps personalize communication.</p>
-            <div className="input-box">
-              <label>Full name *</label>
-              <input
-                value={form.name}
-                onChange={(e) => setField("name", e.target.value)}
-                placeholder="John Doe"
-              />
-                type="text"
-                value={form.username || ''}
-                onChange={handleNameChange}
-                placeholder="Enter your full name"
-                maxLength={50}
-                minLength={2}
-                pattern="[a-zA-Z\s'-]{2,50}"
-                title="Name should contain only letters, spaces, hyphens, and apostrophes"
-                required
-                autoComplete="name"
-                spellCheck={false}
-              />
-              {fieldErrors.username && (
-                <p className="error-text">{fieldErrors.username}</p>
-              )}
-            </div>
-            <div className="nav">
-              <button className="btn secondary" onClick={goBack}>
-                Back
-              </button>
-              <button className="btn" onClick={goNext} disabled={!canNext()}>
-                Next
-              </button>
-            </div>
-          </>
-        )}
+  <>
+    <h2>What's your name?</h2>
+    <p className="hint">This helps personalize communication.</p>
+
+    <div className="input-box">
+      <label>Full name *</label>
+      <input
+        type="text"
+        value={form.username || ""}
+        onChange={handleNameChange}
+        placeholder="Enter your full name"
+        maxLength={50}
+        minLength={2}
+        pattern="[a-zA-Z\s'-]{2,50}"
+        title="Name should contain only letters, spaces, hyphens, and apostrophes"
+        required
+        autoComplete="name"
+        spellCheck={false}
+      />
+      {fieldErrors.username && (
+        <p className="error-text">{fieldErrors.username}</p>
+      )}
+    </div>
+
+    <div className="nav">
+      <button className="btn secondary" onClick={goBack}>
+        Back
+      </button>
+      <button className="btn" onClick={goNext} disabled={!canNext()}>
+        Next
+      </button>
+    </div>
+  </>
+)}
+
 
         {viewStep === 2 && (
           <>

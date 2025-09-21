@@ -42,7 +42,7 @@ class LoginSerializer(serializers.Serializer):
 class PatientProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
     age = serializers.SerializerMethodField()
-    name=serializers.CharField(source="user.username", read_only=True)
+    # name=serializers.CharField(source="user.username", read_only=True)
     class Meta:
         model = PatientProfile
         fields = ["name", "email", "age", "dob", "gender", "phone_number", "assigned_doctor"]

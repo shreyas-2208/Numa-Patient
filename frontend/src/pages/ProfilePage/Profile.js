@@ -6,11 +6,11 @@ const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 function Profile() {
   const [profile, setProfile] = useState({
-    full_name: "",
+    name: "",
     email: "",
     age: "",
     gender: "",
-    phone: "",
+    phone_number: "",
   });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -86,7 +86,7 @@ function Profile() {
       <form onSubmit={handleSubmit}>
         <div className={styles.field}>
           <label>Full Name</label>
-          <input type="text" name="full_name" value={profile.full_name} onChange={handleChange} disabled={!isEditing} />
+          <input type="text" name="full_name" value={profile.name} onChange={handleChange} disabled={!isEditing} />
         </div>
 
         <div className={styles.field}>
@@ -101,17 +101,13 @@ function Profile() {
 
         <div className={styles.field}>
           <label>Gender</label>
-          <select name="gender" value={profile.gender || ""} onChange={handleChange} disabled={!isEditing}>
-            <option value="">Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+          <input type="text" name="gender" value={profile.gender}
+          onChange={handleChange} disabled={!isEditing} />
         </div>
 
         <div className={styles.field}>
           <label>Phone Number</label>
-          <input type="text" name="phone" value={profile.phone || ""} onChange={handleChange} disabled={!isEditing} />
+          <input type="text" name="phone_number" value={profile.phone_number || ""} onChange={handleChange} disabled={!isEditing} />
         </div>
 
         {isEditing && (

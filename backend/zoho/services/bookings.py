@@ -27,8 +27,8 @@ def create_booking(appointment):
     payload = {
         "service_id": "330945000000041052",
         "staff_id": "330945000000041014",
-        "from_time": "20-Sep-2025 12:30:00",
-        "to_time": "20-Sep-2025 14:00:00",
+        "from_time": "25-Sep-2025 12:30:00",
+        "to_time": "25-Sep-2025 14:00:00",
         "timezone": "Asia/Kolkata",
         "customer_details": str({
             "name": appointment.patient.username,
@@ -46,3 +46,6 @@ def create_booking(appointment):
     response = requests.post(url, headers=headers, data=payload)
     response.raise_for_status()
     return response.json()
+
+
+# def get_bookings():

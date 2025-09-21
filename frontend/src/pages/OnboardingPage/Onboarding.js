@@ -156,7 +156,7 @@ export default function Onboarding() {
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    username: "",
+    name: "",
     dob: null,
     ageGroup: null,
     gender: "",
@@ -301,11 +301,12 @@ export default function Onboarding() {
   const canNext = () => {
     const isValidPhone = (v) =>
       /^\d{10}$/.test(String(v || "").replace(/\D/g, ""));
+
     switch (step) {
       case 0:
         return true;
       case 1:
-        return form.username.trim().length > 1; // name
+        return (form.name || "").trim().length > 1; // name
       case 2:
         return isValidPhone(form.phone_number); // phone
       case 3:
@@ -366,7 +367,7 @@ export default function Onboarding() {
               <label>Full name</label>
               <input
                 value={form.name}
-                onChange={(e) => setField("username", e.target.value)}
+                onChange={(e) => setField("name", e.target.value)}
                 placeholder="John Doe"
               />
             </div>

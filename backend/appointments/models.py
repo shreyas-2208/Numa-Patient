@@ -22,6 +22,9 @@ class Appointment(models.Model):
     session_plan = models.ForeignKey(SessionPlan, on_delete=models.SET_NULL, null=True, blank=True)
     package_plan = models.ForeignKey(PackagePlan, on_delete=models.SET_NULL, null=True, blank=True)
 
+    zoho_booking_id=models.CharField(max_length=100, blank=True, null=True)
+    zoho_meeting_link=models.URLField(max_length=500, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

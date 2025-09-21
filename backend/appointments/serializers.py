@@ -13,6 +13,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'date',
             'time',
             'status',
+            'session_plan',
+            'package_plan',
+            'zoho_booking_id',
+            'zoho_meeting_link',
             'created_at'
         ]
         read_only_fields = ["patient", "status", "created_at"]

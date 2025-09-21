@@ -5,11 +5,10 @@ import Onboarding from "./pages/OnboardingPage/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout/Layout";
 import Appointments from "./pages/Appointments";
-import Therapy from "./pages/Therapy";
-import Resources from "./pages/Resources";
 import BookAppointment from "./pages/BookAppointment";
 import PaymentReturn from "./pages/PaymentReturn";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ContactUs from "./pages/ContactUs/ContactUs";
 import { isTokenValid } from "./utils/auth";
 
 function App() {
@@ -36,10 +35,9 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/appointments/book" element={<BookAppointment />} />
         <Route path="/payment/return" element={<PaymentReturn />} />
-        <Route path="/therapy" element={<Therapy />} />
-        <Route path="/resources" element={<Resources />} />
       </Route>
 
       {/* Catch-all */}

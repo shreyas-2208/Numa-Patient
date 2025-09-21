@@ -1,40 +1,640 @@
+/* ===== Sidebar.module.css ===== */
+
+/* Mobile Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 40;
+  opacity: 1;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Sidebar Container */
 .sidebar {
-  width: 220px;
-  background: #2d3e50;
-  color: white;
-  min-height: 100vh;
-  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 50;
+  
+  /* Glassmorphism Background */
+  background: linear-gradient(135deg, 
+    rgba(15, 23, 42, 0.95) 0%, 
+    rgba(30, 41, 59, 0.95) 50%, 
+    rgba(15, 23, 42, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
+  
+  /* Shadow */
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(148, 163, 184, 0.1);
+  
+  /* Transitions */
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
 }
 
+/* Sidebar States */
+.sidebar.expanded {
+  width: 320px;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar.mobileOpen {
+  width: 320px;
+  transform: translateX(0);
+}
+
+.sidebar.mobileClosed {
+  width: 320px;
+  transform: translateX(-100%);
+}
+
+/* Brand Section */
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Logo */
 .logo {
-  margin-bottom: 30px;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #4F46E5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
+  transition: all 0.3s ease;
 }
 
-ul {
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logoIcon {
+  position: relative;
+  z-index: 2;
+}
+
+.logoEmoji {
+  font-size: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.logoGlow {
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #4F46E5 100%);
+  border-radius: 12px;
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* Brand Text */
+.brandText {
+  display: flex;
+  flex-direction: column;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  width: auto;
+  opacity: 1;
+}
+
+.brandText.brandTextHidden {
+  width: 0;
+  opacity: 0;
+}
+
+.brandName {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.025em;
+}
+
+.brandSub {
+  font-size: 14px;
+  color: #94A3B8;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* Collapse Toggle */
+.collapseToggle {
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.collapseToggle:hover {
+  background: rgba(30, 41, 59, 0.5);
+  color: #FFFFFF;
+  transform: scale(1.1);
+}
+
+.collapseToggle:active {
+  transform: scale(0.95);
+}
+
+.toggleIcon {
+  transition: transform 0.3s ease;
+}
+
+.toggleIcon.toggleIconRotated {
+  transform: rotate(180deg);
+}
+
+/* Navigation */
+.navigation {
+  flex: 1;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.navList {
   list-style: none;
+  margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-li {
-  border-radius: 6px;
+.navItem {
+  animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-/* Style links inside sidebar */
-.sidebar a {
-  display: block;          /* make whole row clickable */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Navigation Links */
+.navLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #CBD5E1;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.navLink:hover {
+  background: rgba(30, 41, 59, 0.4);
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.navLink:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.navLink.active {
+  background: rgba(30, 41, 59, 0.6);
+  color: #FFFFFF;
+}
+
+/* Navigation Background Gradient */
+.navBackground {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navBackground.navBackgroundVisible {
+  opacity: 1;
+}
+
+/* Navigation Icon */
+.navIcon {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  transition: all 0.3s ease;
+}
+
+.navLink:hover .navIcon {
+  background: rgba(51, 65, 85, 0.6);
+  transform: scale(1.1);
+}
+
+.navEmoji {
+  font-size: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Navigation Label */
+.navLabel {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  opacity: 1;
+}
+
+.navLabel.navLabelHidden {
+  width: 0;
+  opacity: 0;
+}
+
+/* Navigation Indicator */
+.navIndicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 32px;
+  background: linear-gradient(180deg, #3B82F6 0%, #8B5CF6 100%);
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navLink:hover .navIndicator {
+  opacity: 1;
+}
+
+.navLink.active .navIndicator {
+  opacity: 1;
+}
+
+/* Bottom Actions */
+.bottomActions {
+  padding: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Icon Buttons */
+.iconButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.iconBtn {
   padding: 12px;
-  text-decoration: none;   /* remove underline */
-  color: white;            /* white text */
-  border-radius: 6px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* Hover effect */
-.sidebar a:hover {
-  background: #40566e;
+.iconBtn:hover {
+  background: rgba(51, 65, 85, 0.6);
+  color: #FFFFFF;
+  transform: scale(1.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Active page (from NavLink) */
-.sidebar a.active {
-  background: #1c2a38;
-  font-weight: bold;
+.iconBtn:active {
+  transform: scale(0.95);
+}
+
+/* Logout Button */
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #F87171;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  font-weight: 500;
+}
+
+.logoutBtn:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.3) 100%);
+  color: #FCA5A5;
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);
+}
+
+.logoutBtn:active {
+  transform: scale(0.95);
+}
+
+.logoutBtn.logoutBtnCollapsed {
+  padding: 12px;
+  flex: none;
+}
+
+.logoutText {
+  font-weight: 500;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  opacity: 1;
+}
+
+.logoutText.logoutTextHidden {
+  width: 0;
+  opacity: 0;
+}
+
+/* Mobile Close Button */
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.5);
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(51, 65, 85, 0.6);
+  color: #FFFFFF;
+  transform: scale(1.1);
+}
+
+.closeBtn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 320px !important;
+  }
+  
+  .brandText,
+  .navLabel,
+  .logoutText {
+    width: auto !important;
+    opacity: 1 !important;
+  }
+}
+/* ... Previous styles remain the same until Collapse Toggle ... */
+
+/* Collapse Toggle - Enhanced */
+.collapseToggle {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.collapseToggle:hover {
+  background: rgba(51, 65, 85, 0.6);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #FFFFFF;
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.collapseToggle:active {
+  transform: scale(0.95);
+}
+
+.collapseToggle.collapseToggleCollapsed {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #3B82F6;
+}
+
+.collapseToggle.collapseToggleCollapsed:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: #60A5FA;
+}
+
+.toggleIcon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggleIcon.toggleIconRotated {
+  transform: rotate(180deg);
+}
+
+/* ... Navigation styles remain the same ... */
+
+/* Bottom Actions - Fixed Layout */
+.bottomActions {
+  padding: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.actionButtons.actionButtonsCollapsed {
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Icon Buttons - Fixed Layout */
+.iconButtons {
+  display: flex;
+  gap: 8px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.iconButtons.iconButtonsCollapsed {
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.iconBtn {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.iconBtn:hover {
+  background: rgba(51, 65, 85, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.iconBtn:active {
+  transform: translateY(0);
+}
+
+/* Logout Button - Enhanced */
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #F87171;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+  font-weight: 500;
+  min-height: 44px;
+  overflow: hidden;
+}
+
+.logoutBtn:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.3) 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #FCA5A5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);
+}
+
+.logoutBtn:active {
+  transform: translateY(0);
+}
+
+.logoutBtn.logoutBtnCollapsed {
+  padding: 12px;
+  flex: none;
+  width: 100%;
+  gap: 0;
+}
+
+.logoutText {
+  font-weight: 500;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 1;
+  width: auto;
+}
+
+.logoutText.logoutTextHidden {
+  width: 0;
+  opacity: 0;
+}
+
+/* ... Rest of the styles remain the same ... */
+
+/* Enhanced Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 320px !important;
+  }
+  
+  .brandText,
+  .navLabel,
+  .logoutText {
+    width: auto !important;
+    opacity: 1 !important;
+  }
+  
+  .actionButtons,
+  .iconButtons {
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+  
+  .actionButtons.actionButtonsCollapsed,
+  .iconButtons.iconButtonsCollapsed {
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+}
+
+/* Smooth transitions for all collapsible elements */
+.sidebar * {
+  transition-property: width, opacity, transform, background-color, border-color, color, box-shadow;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

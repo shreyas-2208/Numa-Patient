@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import indiaCities from "./cities-in-india.json";
 import { useNavigate } from "react-router-dom";
-import "./Onboarding.module.css";
+import "./Onboarding.css";
 import api from "../../api/axios";
 import { fetchSessionPlans } from "../../api/plans";
 import PlanSelector from "../../components/PlanSelector/PlanSelector";
@@ -10,7 +10,7 @@ const INDIA_CITIES = [...indiaCities, "Others/Outside India"];
 
 const ISSUES = [
   "Feeling sad",
-  "Low mood",
+  "Low mood", 
   "Anxiety",
   "Stress",
   "Insomnia",
@@ -70,7 +70,7 @@ const DOCTORS = [
   },
   {
     id: "doc3",
-    name: "C",
+    name: "Dr. C",
     role: "Psychologist",
     bio: "CBT for stress, work burnout, and relationships.",
     weekday: true,
@@ -81,23 +81,29 @@ const DOCTORS = [
   },
 ];
 
-const DUMMY_SLOTS = (doctorId) => {
-  const now = new Date();
-  const slots = [];
-  for (let d = 0; d < 14; d++) {
-    const day = new Date(now);
-    day.setDate(now.getDate() + d);
-    const dayStr = day.toISOString().slice(0, 10);
-    ["09:30", "14:30", "19:00"].forEach((t) => {
-      slots.push({
-        id: `${doctorId}-${dayStr}-${t}`,
-        doctorId,
-        date: dayStr,
-        time: t,
-      });
-    });
+// Input validation functions
+const validateName = (name) => {
+  const nameRegex = /^[a-zA-Z\s'-]{2,50}$/;
+  return nameRegex.test(name.trim());
+};
+
+const validatePhone = (phone) => {
+  const phoneRegex = /^\d{10}$/;; // Indian mobile numbers start with 6-9
+  return phoneRegex.test(phone);
+};
+
+const validateAge = (dob) => {
+  if (!dob) return false;
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear(); // Changed from const to let
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--; // This line was causing the error - trying to modify const
   }
-  return slots;
+  
+  return age >= 5 && age <= 120;
 };
 
 function inferAgeGroup(dobISO) {
@@ -131,7 +137,7 @@ function assignDoctor({
     return dayOk && timeOk && ageOk;
   });
 
-  return pool || DOCTORS;
+  return pool.length > 0 ? pool : DOCTORS;
 }
 
 const saveOnboarding = async (form) => {
@@ -140,7 +146,6 @@ const saveOnboarding = async (form) => {
     console.log("Saved onboarding:", data);
     return data;
   } catch (err) {
-    // Axios puts error response under err.response
     const message = err.response?.data?.detail || "Failed to save onboarding";
     console.error("Error saving onboarding:", message);
     throw new Error(message);
@@ -150,10 +155,10 @@ const saveOnboarding = async (form) => {
 export default function Onboarding() {
   const navigate = useNavigate();
 
-  const goToDashboard = () => {
-    navigate("/dashboard");
-  };
-
+  // Animation state for smooth transitions
+  const [fadeDir, setFadeDir] = useState('in');
+  const [viewStep, setViewStep] = useState(0);
+  
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     username: "",
@@ -176,8 +181,18 @@ export default function Onboarding() {
 
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // Smooth step transitions with fade animation
+  useEffect(() => {
+    setFadeDir('out');
+    const timeout = setTimeout(() => {
+      setViewStep(step);
+      setFadeDir('in');
+    }, 180);
+    return () => clearTimeout(timeout);
+  }, [step]);
 
   useEffect(() => {
     async function loadPlans() {
@@ -199,7 +214,7 @@ export default function Onboarding() {
     } catch (err) {
       console.error("Error saving draft:", err);
     }
-  }, [form]); // depends on form
+  }, [form]);
 
   useEffect(() => {
     const timeout = setTimeout(() => saveDraft(), 1000);
@@ -218,98 +233,122 @@ export default function Onboarding() {
     loadDraft();
   }, []);
 
-  const totalSteps = 13; // steps 0..12
+  const totalSteps = 10;
   const progressPct = (step / (totalSteps - 1)) * 100;
 
-  const slots = useMemo(
-    () => (form.doctor ? DUMMY_SLOTS(form.doctor.id) : []),
-    [form.doctor]
-  );
-
-  const setField = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
-  const next = () => setStep((s) => Math.min(s + 1, totalSteps - 1));
-  const back = () => setStep((s) => Math.max(s - 1, 0));
+  const setField = (k, v) => {
+    setForm((prev) => ({ ...prev, [k]: v }));
+    // Clear field error when user starts typing
+    if (fieldErrors[k]) {
+      setFieldErrors(prev => ({ ...prev, [k]: null }));
+    }
+  };
+  
+  const goNext = () => setStep((s) => Math.min(s + 1, totalSteps - 1));
+  const goBack = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleDOB = (v) => {
     const group = inferAgeGroup(v);
     setForm((prev) => ({ ...prev, dob: v, ageGroup: group }));
+    // Clear DOB error when user selects a date
+    if (fieldErrors.dob) {
+      setFieldErrors(prev => ({ ...prev, dob: null }));
+    }
+  };
+
+  // Enhanced name input handler with validation
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    // Allow only letters, spaces, hyphens, and apostrophes
+    const filteredValue = value.replace(/[^a-zA-Z\s'-]/g, '');
+    setField("username", filteredValue);
+    
+    if (filteredValue && !validateName(filteredValue)) {
+      setFieldErrors(prev => ({ 
+        ...prev, 
+        username: "Name must be 2-50 characters and contain only letters, spaces, hyphens, and apostrophes" 
+      }));
+    }
+  };
+
+  // Enhanced phone input handler with validation
+  const handlePhoneChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length <= 10) {
+      setField("phone_number", value);
+      
+      if (value && !validatePhone(value)) {
+        setFieldErrors(prev => ({ 
+          ...prev, 
+          phone_number: "Enter a valid 10-digit Indian mobile number starting with 6-9" 
+        }));
+      }
+    }
   };
 
   const toggleIssue = (issue) => {
     setForm((prev) => {
       const exists = prev.reason_for_visit.includes(issue);
+      const newReasons = exists
+        ? prev.reason_for_visit.filter((i) => i !== issue)
+        : [...prev.reason_for_visit, issue];
+      
+      // Limit to maximum 5 selections
+      if (newReasons.length > 5) {
+        setFieldErrors(prev => ({ 
+          ...prev, 
+          reason_for_visit: "Please select maximum 5 concerns" 
+        }));
+        return prev;
+      }
+      
+      // Clear error when user makes valid selection
+      if (fieldErrors.reason_for_visit) {
+        setFieldErrors(prev => ({ ...prev, reason_for_visit: null }));
+      }
+      
       return {
         ...prev,
-        reason_for_visit: exists
-          ? prev.reason_for_visit.filter((i) => i !== issue)
-          : [...prev.reason_for_visit, issue],
+        reason_for_visit: newReasons,
       };
     });
   };
 
-  const handleAssignDoctor = () => {
+  const handleAssignDoctor = async () => {
     const chosenArr = assignDoctor({
       preferred_session_timings: form.preferred_session_timings,
       preferred_time_of_day: form.preferred_time_of_day,
       ageGroup: form.ageGroup,
     });
-    // Pick the first doctor from the array
-    setField("doctor", chosenArr[0]);
-  };
-
-  const createTempBooking = () => {
-    if (!form.slotId) return;
-    const id = `tmp_${Date.now()}`;
-    setField("bookingTempId", id);
-  };
-
-  const startPayment = async () => {
-    setField("paymentStatus", "processing");
-
+    
+    const assignedDoctor = chosenArr[0];
+    setField("doctor", assignedDoctor);
+    
+    // Save the final draft with doctor assignment
+    const updatedForm = { ...form, doctor: assignedDoctor };
     try {
-      // simulate payment delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      // generate meeting link
-      const meeting = `https://meet.zoho.in/${form.doctor?.id}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}`;
-      setField("meetingLink", meeting);
-      setField("paymentStatus", "success");
-
-      // save draft before redirecting
-      await saveDraft();
-
-      // navigate to dashboard
-      goToDashboard();
+      await saveOnboarding(updatedForm);
+      console.log("Final onboarding saved with doctor assignment");
+      
+      // Redirect to dashboard immediately after doctor assignment
+      navigate("/dashboard");
     } catch (err) {
-      console.error("Payment failed:", err);
-      setField("paymentStatus", "failed");
+      console.error("Error saving final onboarding:", err);
+      // Still redirect even if save fails
+      navigate("/dashboard");
     }
-  };
-
-  // Save draft and exit from package step onwards
-  const finishLater = async () => {
-    try {
-      await saveDraft(); // save current form to backend
-    } catch (err) {
-      console.error("Failed to save draft:", err);
-    }
-    goToDashboard(); // actually call the function to navigate
   };
 
   const canNext = () => {
-    const isValidPhone = (v) =>
-      /^\d{10}$/.test(String(v || "").replace(/\D/g, ""));
     switch (step) {
       case 0:
         return true;
       case 1:
-        return form.username.trim().length > 1; // name
+        return validateName(form.username) && !fieldErrors.username;
       case 2:
-        return isValidPhone(form.phone_number); // phone
+        return validatePhone(form.phone_number) && !fieldErrors.phone_number;
       case 3:
-        return !!form.dob && !!form.ageGroup; // dob
+        return !!form.dob && validateAge(form.dob) && !!form.ageGroup && !fieldErrors.dob;
       case 4:
         return !!form.gender;
       case 5:
@@ -317,180 +356,200 @@ export default function Onboarding() {
       case 6:
         return !!form.preferred_languages;
       case 7:
-        return form.reason_for_visit.length > 0;
+        return form.reason_for_visit.length > 0 && form.reason_for_visit.length <= 5;
       case 8:
         return !!form.preferred_session_timings;
       case 9:
         return !!form.preferred_time_of_day;
-      case 10:
-        return !!form.package;
-      case 11:
-        return !!form.slotId;
       default:
         return true;
     }
   };
 
+  // Get today's date for date input constraints
+  const today = new Date().toISOString().split('T')[0];
+  const minDate = new Date();
+  minDate.setFullYear(minDate.getFullYear() - 120);
+  const minDateStr = minDate.toISOString().split('T')[0];
+
   return (
     <div className="onboarding-container">
-      <div className="onboarding-card fade-step fade-in">
-        <div className="progress">
-          <div style={{ width: `${progressPct}%` }} />
-        </div>
+      {/* Minimal progress bar */}
+      <div className="progress">
+        <div style={{ width: `${progressPct}%` }} />
+      </div>
 
-        {step === 0 && (
+      {/* Step content with fade animation - no card wrapper */}
+      <div className={`fade-step ${fadeDir === 'in' ? 'fade-in' : 'fade-out'}`}>
+        {viewStep === 0 && (
           <>
             <div className="header">
-              <div className="logo-dot" />
               <h2>Welcome to NUMA</h2>
             </div>
             <p className="hint">
-              Let’s personalize the care journey. One quick step at a time.
+              NUMA provides accessible, expert-led mental health care tailored to personal needs, from first consults to ongoing support, privately and securely.
+            </p>
+            <p className="hint">
+              Let's personalize your care journey, one quick step at a time.
             </p>
             <div className="nav">
-              <button className="btn" onClick={next}>
+              <button className="btn" onClick={goNext}>
                 Get started
-              </button>
-              <button className="btn ghost" onClick={() => setStep(1)}>
-                Skip intro
               </button>
             </div>
           </>
         )}
 
-        {step === 1 && (
+        {viewStep === 1 && (
           <>
-            <h2>What’s your name?</h2>
+            <h2>What's your name?</h2>
             <p className="hint">This helps personalize communication.</p>
             <div className="input-box">
-              <label>Full name</label>
+              <label>Full name *</label>
               <input
-                value={form.name}
-                onChange={(e) => setField("username", e.target.value)}
-                placeholder="John Doe"
+                type="text"
+                value={form.username || ''}
+                onChange={handleNameChange}
+                placeholder="Enter your full name"
+                maxLength={50}
+                minLength={2}
+                pattern="[a-zA-Z\s'-]{2,50}"
+                title="Name should contain only letters, spaces, hyphens, and apostrophes"
+                required
+                autoComplete="name"
+                spellCheck={false}
               />
+              {fieldErrors.username && (
+                <p className="error-text">{fieldErrors.username}</p>
+              )}
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button className="btn" onClick={next} disabled={!canNext()}>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 2 && (
+        {viewStep === 2 && (
           <>
             <h2>Enter your phone number</h2>
             <p className="hint">
-              We'll use this for appointment updates and reminders.
+              Used for appointment updates and reminders.
             </p>
             <div className="input-box">
-              <label>Phone Number</label>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span
-                  style={{
-                    padding: "10px 12px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 8,
-                    background: "#f9fafb",
-                  }}
-                >
-                  +91
-                </span>
+              <label>Phone Number *</label>
+              <div className="phone-input-group">
+                <span className="country-code">+91</span>
                 <input
                   type="tel"
                   inputMode="numeric"
                   maxLength={10}
-                  placeholder="10-digit number"
+                  minLength={10}
+                  pattern="[6-9]\d{9}"
+                  placeholder="9876543210"
                   value={form.phone_number || ""}
-                  onChange={(e) =>
-                    setField("phone_number", e.target.value.replace(/\D/g, ""))
-                  }
+                  onChange={handlePhoneChange}
+                  title="Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9"
+                  required
+                  autoComplete="tel"
                 />
               </div>
-              <div className="small" style={{ marginTop: 6, color: "#6b7280" }}>
-                Only digits. No spaces or dashes.
-              </div>
+              {fieldErrors.phone_number && (
+                <p className="error-text">{fieldErrors.phone_number}</p>
+              )}
+              <p className="small">Enter a 10-digit mobile number starting with 6-9</p>
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button className="btn" onClick={next} disabled={!canNext()}>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 3 && (
+        {viewStep === 3 && (
           <>
             <h2>Date of birth</h2>
             <p className="hint">Age group will be inferred automatically.</p>
             <div className="input-box">
-              <label>DOB</label>
+              <label>Date of Birth *</label>
               <input
                 type="date"
                 value={form.dob || ""}
                 onChange={(e) => handleDOB(e.target.value)}
+                min={minDateStr}
+                max={today}
+                required
+                title="Please select your date of birth"
               />
+              {fieldErrors.dob && (
+                <p className="error-text">{fieldErrors.dob}</p>
+              )}
+              {form.ageGroup && (
+                <p className="small">
+                  Detected age group: <strong>{form.ageGroup}</strong>
+                </p>
+              )}
             </div>
-            {form.ageGroup && (
-              <p className="small">
-                Detected age group: <strong>{form.ageGroup}</strong>
-              </p>
-            )}
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button className="btn" onClick={next} disabled={!canNext()}>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 4 && (
+        {viewStep === 4 && (
           <>
             <h2>Gender</h2>
             <p className="hint">Optional, used to improve care matching.</p>
             <div className="input-box">
+              <label>Gender *</label>
               <select
-                value={form.gender}
+                value={form.gender || ''}
                 onChange={(e) => setField("gender", e.target.value)}
+                required
               >
-                <option value="">Select gender</option>
-                <option>Female</option>
-                <option>Male</option>
-                <option>Non-binary</option>
-                <option>Prefer not to say</option>
+                <option value="" disabled>Select gender</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Non-binary">Non-binary</option>
+                <option value="Prefer not to say">Prefer not to say</option>
               </select>
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button className="btn" onClick={next} disabled={!canNext()}>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 5 && (
+        {viewStep === 5 && (
           <>
             <h2>City / Location</h2>
             <p className="hint">Choose an Indian city or Outside India.</p>
             <div className="input-box">
+              <label>City *</label>
               <select
-                value={form.city}
+                value={form.city || ''}
                 onChange={(e) => setField("city", e.target.value)}
+                required
               >
-                <option value="">Select city</option>
+                <option value="" disabled>Select city</option>
                 {INDIA_CITIES.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -499,29 +558,32 @@ export default function Onboarding() {
               </select>
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button className="btn" onClick={next} disabled={!canNext()}>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 6 && (
+        {viewStep === 6 && (
           <>
             <h2>Preferred language</h2>
             <p className="hint">
               Pick the language most comfortable for sessions.
             </p>
             <div className="input-box">
+              <label>Language *</label>
               <select
-                value={form.preferred_languages}
+                value={form.preferred_languages || ''}
                 onChange={(e) =>
                   setField("preferred_languages", e.target.value)
                 }
+                required
               >
+                <option value="" disabled>Select language</option>
                 {LANGUAGES.map((l) => (
                   <option key={l} value={l}>
                     {l}
@@ -530,63 +592,59 @@ export default function Onboarding() {
               </select>
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button className="btn" onClick={next} disabled={!canNext()}>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 7 && (
+        {viewStep === 7 && (
           <>
             <h2>What brings you here?</h2>
             <p className="hint">
-              Select one or more that best describe the concern.
+              Select 1-5 concerns that best describe your situation.
             </p>
             <div className="pills">
               {ISSUES.map((tag) => (
                 <button
                   type="button"
                   key={tag}
-                  className={`pill ${form.reason_for_visit.includes(tag) ? "active" : ""
-                    }`}
+                  className={`pill ${form.reason_for_visit.includes(tag) ? "active" : ""}`}
                   onClick={() => toggleIssue(tag)}
+                  disabled={form.reason_for_visit.length >= 5 && !form.reason_for_visit.includes(tag)}
                 >
                   {tag}
                 </button>
               ))}
             </div>
+            {fieldErrors.reason_for_visit && (
+              <p className="error-text">{fieldErrors.reason_for_visit}</p>
+            )}
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button
-                className="btn"
-                onClick={() => {
-                  next();
-                  handleAssignDoctor();
-                }}
-                disabled={!canNext()}
-              >
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 8 && (
+        {viewStep === 8 && (
           <>
-            <h2>Session days</h2>
+            <h2>Preferred days</h2>
             <p className="hint">When are sessions preferred?</p>
             <div className="pills">
               {["Weekdays", "Weekends", "Flexible"].map((v) => (
                 <button
                   key={v}
-                  className={`pill ${form.preferred_session_timings === v ? "active" : ""
-                    }`}
+                  type="button"
+                  className={`pill ${form.preferred_session_timings === v ? "active" : ""}`}
                   onClick={() => setField("preferred_session_timings", v)}
                 >
                   {v}
@@ -594,31 +652,26 @@ export default function Onboarding() {
               ))}
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
-              <button
-                className="btn"
-                onClick={() => {
-                  next();
-                }}
-              >
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
                 Next
               </button>
             </div>
           </>
         )}
 
-        {step === 9 && (
+        {viewStep === 9 && (
           <>
-            <h2>Time of day</h2>
+            <h2>Preferred time</h2>
             <p className="hint">Choose a preferred time window.</p>
             <div className="pills">
               {["Morning", "Evening", "Flexible"].map((v) => (
                 <button
                   key={v}
-                  className={`pill ${form.preferred_time_of_day === v ? "active" : ""
-                    }`}
+                  type="button"
+                  className={`pill ${form.preferred_time_of_day === v ? "active" : ""}`}
                   onClick={() => setField("preferred_time_of_day", v)}
                 >
                   {v}
@@ -626,160 +679,15 @@ export default function Onboarding() {
               ))}
             </div>
             <div className="nav">
-              <button className="btn secondary" onClick={back}>
+              <button className="btn secondary" onClick={goBack}>
                 Back
               </button>
               <button
                 className="btn"
-                onClick={() => {
-                  handleAssignDoctor();
-                  next();
-                }}
+                onClick={handleAssignDoctor}
+                disabled={!canNext()}
               >
-                Next
-              </button>
-            </div>
-          </>
-        )}
-
-        {step === 10 && (
-          <>
-            <h2>Assigned clinician</h2>
-            <p className="hint">Matched by preference and age group.</p>
-            {form.doctor && (
-              <div className="doctor-card">
-                <div className="doctor-avatar">
-                  {form.doctor.name
-                    .split(" ")
-                    .map((w) => w[0])
-                    .join("")}
-                </div>
-                <div>
-                  <div>
-                    <strong>{form.doctor.name}</strong> • {form.doctor.role}
-                  </div>
-                  <div className="small">{form.doctor.bio}</div>
-                </div>
-              </div>
-            )}
-            {/* <div className="card-section">
-              <label>Package</label>
-              {error && <p className="error">{error}</p>}
-              <div className="pills">
-                {plans.map((plan) => (
-                  <button
-                    key={plan.id}
-                    className={`pill ${form.package === plan.code ? "active" : ""}`}
-                    onClick={() => setField("package", plan.code)}
-                  >
-                    {plan.name} · {plan.duration} mins{" "}
-                    {plan.price ? `· ₹${plan.price}` : ""}
-                  </button>
-                ))}
-              </div>
-            </div> */}
-
-            <PlanSelector
-              plans={plans}
-              selectedPlan={selectedPlan}
-              onSelectPlan={setSelectedPlan}
-            />
-
-            <div className="nav">
-              <button className="btn secondary" onClick={back}>
-                Back
-              </button>
-              {/* todo: change disabled */}
-              <button className="btn" onClick={next} disabled={!selectedPlan}>
-                Next
-              </button>
-              <button
-                className="btn ghost"
-                style={{ marginLeft: "auto", fontSize: "0.85rem" }}
-                onClick={finishLater}
-              >
-                Finish later
-              </button>
-            </div>
-          </>
-        )}
-
-        {step === 11 && (
-          <>
-            <h2>First session slot</h2>
-            <p className="hint">Choose a slot in the next 2 weeks.</p>
-            <div className="input-box">
-              <label>Available slots</label>
-              <select
-                value={form.slotId}
-                onChange={(e) => setField("slotId", e.target.value)}
-              >
-                <option value="">Select a slot</option>
-                {slots.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.date} · {s.time}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="nav">
-              <button className="btn secondary" onClick={back}>
-                Back
-              </button>
-              <button
-                className="btn"
-                onClick={() => {
-                  createTempBooking();
-                  startPayment();
-                }}
-              >
-                Continue to payment
-              </button>
-              <button
-                className="btn ghost"
-                style={{ marginLeft: "auto", fontSize: "0.85rem" }}
-                onClick={finishLater}
-              >
-                Finish later
-              </button>
-            </div>
-            {form.paymentStatus === "processing" && (
-              <p className="small">Redirecting to payment…</p>
-            )}
-          </>
-        )}
-
-        {step === 12 && (
-          <>
-            <h2>Booking confirmed</h2>
-            <p className="hint">Payment successful. Session scheduled.</p>
-            <div className="card-section">
-              <div className="small">
-                Doctor: <strong>{form.doctor?.name}</strong>
-              </div>
-              <div className="small">
-                Package: <strong>{form.package}</strong>
-              </div>
-              <div className="small">
-                Slot: <strong>{form.slotId}</strong>
-              </div>
-              <div className="small">
-                Meeting:{" "}
-                <a href={form.meetingLink} target="_blank" rel="noreferrer">
-                  {form.meetingLink}
-                </a>
-              </div>
-            </div>
-            <div className="nav">
-              <button className="btn" onClick={goToDashboard}>
-                Go to dashboard
-              </button>
-              <button
-                className="btn ghost"
-                style={{ marginLeft: "auto", fontSize: "0.85rem" }}
-                onClick={goToDashboard}
-              >
-                Finish later
+                Complete onboarding
               </button>
             </div>
           </>

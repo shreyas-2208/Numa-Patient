@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [hasBookedFirstSession, setHasBookedFirstSession] = useState(false);
   const [consultant, setConsultant] = useState(null);
-  const [isOnboarded, setIsOnboarded] = useState(true); // default true so old users don’t break
+  const [isOnboarded, setIsOnboarded] = useState(true); // default true so old users don't break
 
   useEffect(() => {
     async function load() {
@@ -38,20 +38,29 @@ const Dashboard = () => {
         const nextAppointment = upcomingSorted[0] || null;
         setUpcoming(upcomingSorted || null);
 
-        // Mock consultant data - replace with actual API call
-        if (nextAppointment && nextAppointment.doctor) {
-          setConsultant({
-          name: nextAppointment.doctor.name,
-          specialization: nextAppointment.doctor.specialization,
-          experience: nextAppointment.doctor.experience || "N/A", // optional field
-          rating: nextAppointment.doctor.rating || 0, // optional
-          image: nextAppointment.doctor.image || "/api/placeholder/100/100",
-        });
+        // Get onboarding status
+        const { data } = await api.get("api/users/onboarding/");
+        setIsOnboarded(data.is_onboarded ?? false);
+
+        // Fetch consultant data if onboarded (regardless of booking status)
+        if (data.is_onboarded) {
+          // If there's an upcoming appointment, use that doctor info
+          if (nextAppointment && nextAppointment.doctor) {
+            setConsultant({
+              name: nextAppointment.doctor.name,
+              specialization: nextAppointment.doctor.specialization,
+              experience: nextAppointment.doctor.experience || "N/A",
+              rating: nextAppointment.doctor.rating || 0,
+              image: nextAppointment.doctor.image || "/api/placeholder/100/100",
+            });
+          } else {
+            // TODO: Fetch assigned consultant from onboarding/profile API
+            // For now, you might want to add an API call here to get the assigned consultant
+            // Example: const consultantData = await api.get("api/users/assigned-consultant/");
+            // setConsultant(consultantData.data);
+          }
         }
 
-      const { data } = await api.get("api/users/onboarding/");
-
-      setIsOnboarded(data.is_onboarded ?? false);
       } catch (e) {
         setError("Failed to load dashboard data");
       } finally {
@@ -69,10 +78,10 @@ const Dashboard = () => {
     if (!upcoming) return;
     try {
       if (!upcoming || !upcoming.meeting_link) {
-    setError("Meeting link not available");
-    return;
-  }
-  window.open(upcoming.zoho_meeting_link, "_blank");
+        setError("Meeting link not available");
+        return;
+      }
+      window.open(upcoming.zoho_meeting_link, "_blank");
     } catch (e) {
       setError("Could not retrieve meeting link");
     }
@@ -98,44 +107,27 @@ const Dashboard = () => {
 
       {error && <div className={styles.error}>{error}</div>}
 
-      {/* First Session Booking Section */}
-      {!hasBookedFirstSession && (
+      {/* Onboarding Section - FIRST PRIORITY */}
+      {!isOnboarded && (
         <section className={styles.firstSessionSection}>
           <div className={styles.welcomeCard}>
-            <div className={styles.welcomeIcon}>🌟</div>
-            <h2>Start Your Journey</h2>
-            <p>Book your first consultation session to begin your personalized mental health journey with our expert therapists.</p>
-            
-            <button 
+            <div className={styles.welcomeIcon}>📝</div>
+            <h2>Complete Your Onboarding</h2>
+            <p>Before booking your first session, please complete the onboarding process to personalize your mental health journey.</p>
+            <button
               className={styles.primaryButton}
-              onClick={handleBookFirstSession}
+              onClick={() => navigate("/onboarding")}
             >
-              Book First Session
+              Go to Onboarding
             </button>
           </div>
         </section>
       )}
 
-      {!isOnboarded && (
-  <section className={styles.firstSessionSection}>
-    <div className={styles.welcomeCard}>
-      <div className={styles.welcomeIcon}>📝</div>
-      <h2>Complete Your Onboarding</h2>
-      <p>Before booking your first session, please complete the onboarding process.</p>
-      <button
-        className={styles.primaryButton}
-        onClick={() => navigate("/onboarding")}
-      >
-        Go to Onboarding
-      </button>
-    </div>
-  </section>
-)}
-
-      {/* Existing User Dashboard */}
-      {hasBookedFirstSession && (
+      {/* Show consultant info and content for onboarded users */}
+      {isOnboarded && (
         <>
-          {/* Consultant Information */}
+          {/* Consultant Information - Show after onboarding completion */}
           {consultant && (
             <section className={styles.consultantSection}>
               <div className={styles.consultantCard}>
@@ -159,47 +151,67 @@ const Dashboard = () => {
             </section>
           )}
 
-          {/* Upcoming Appointments */}
-          <section className={styles.appointmentsSection}>
-            <h2>Upcoming Sessions</h2>
-            {upcoming ? (
-              <div className={styles.appointmentCard}>
-                <div className={styles.appointmentInfo}>
-                  <div className={styles.appointmentDate}>
-                    <span className={styles.day}>
-                      {new Date(upcoming.date).getDate()}
-                    </span>
-                    <span className={styles.month}>
-                      {new Date(upcoming.date).toLocaleDateString(undefined, { month: 'short' })}
-                    </span>
-                  </div>
-                  <div className={styles.appointmentDetails}>
-                    <h3>Consultation Session</h3>
-                    <p>📅 {new Date(upcoming.date).toLocaleDateString()}</p>
-                    <p>🕐 {upcoming.time}</p>
-                    <p>👩‍⚕️ {consultant?.name || 'Your consultant'}</p>
-                  </div>
-                </div>
-                <button 
-                  className={styles.joinButton}
-                  onClick={handleJoinSession}
-                >
-                  Join Session
-                </button>
-              </div>
-            ) : (
-              <div className={styles.noAppointments}>
-                <div className={styles.emptyIcon}>📅</div>
-                <p>No upcoming sessions scheduled</p>
+          {/* First Session Booking Section - Show after onboarding if no sessions booked */}
+          {!hasBookedFirstSession && (
+            <section className={styles.firstSessionSection}>
+              <div className={styles.welcomeCard}>
+                <div className={styles.welcomeIcon}>🌟</div>
+                <h2>Start Your Journey</h2>
+                <p>Book your first consultation session to begin your personalized mental health journey with our expert therapists.</p>
+                
                 <button 
                   className={styles.primaryButton}
-                  onClick={() => navigate('/book-appointment')}
+                  onClick={handleBookFirstSession}
                 >
-                  Book New Session
+                  Book First Session
                 </button>
               </div>
-            )}
-          </section>
+            </section>
+          )}
+
+          {/* Upcoming Appointments - Show for users who have booked sessions */}
+          {hasBookedFirstSession && (
+            <section className={styles.appointmentsSection}>
+              <h2>Upcoming Sessions</h2>
+              {upcoming ? (
+                <div className={styles.appointmentCard}>
+                  <div className={styles.appointmentInfo}>
+                    <div className={styles.appointmentDate}>
+                      <span className={styles.day}>
+                        {new Date(upcoming.date).getDate()}
+                      </span>
+                      <span className={styles.month}>
+                        {new Date(upcoming.date).toLocaleDateString(undefined, { month: 'short' })}
+                      </span>
+                    </div>
+                    <div className={styles.appointmentDetails}>
+                      <h3>Consultation Session</h3>
+                      <p>📅 {new Date(upcoming.date).toLocaleDateString()}</p>
+                      <p>🕐 {upcoming.time}</p>
+                      <p>👩‍⚕️ {consultant?.name || 'Your consultant'}</p>
+                    </div>
+                  </div>
+                  <button 
+                    className={styles.joinButton}
+                    onClick={handleJoinSession}
+                  >
+                    Join Session
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.noAppointments}>
+                  <div className={styles.emptyIcon}>📅</div>
+                  <p>No upcoming sessions scheduled</p>
+                  <button 
+                    className={styles.primaryButton}
+                    onClick={() => navigate('/book-appointment')}
+                  >
+                    Book New Session
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Quick Actions */}
           <section className={styles.quickActions}>
@@ -220,12 +232,15 @@ const Dashboard = () => {
                 <span>View History</span>
               </button>
               <button className={styles.actionCard}>
-                <span className={styles.actionIcon}>💬</span>
-                <span>Messages</span>
+                <span className={styles.actionIcon}
+                onClick={() => navigate('/contact-us')}>💬</span>
+                <span>Contact Us</span>
+    
               </button>
               <button className={styles.actionCard}>
-                <span className={styles.actionIcon}>📊</span>
-                <span>Progress</span>
+                <span className={styles.actionIcon}
+                onClick={() => navigate('/profile')}>📊</span>
+                <span>Profile</span>
               </button>
             </div>
           </section>

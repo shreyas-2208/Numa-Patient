@@ -1,35 +1,155 @@
+/* AuthPage.css */
 .auth-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 30px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  max-width: 420px;
+  margin: 80px auto;
+  padding: 48px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   text-align: center;
-  background-color: #f9f9f9;
+}
+
+.auth-container h2 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 32px 0;
+  letter-spacing: -0.025em;
+}
+
+.auth-container form {
+  margin-bottom: 32px;
 }
 
 .auth-container input {
   display: block;
-  width: 90%;
-  margin: 10px auto;
-  padding: 8px;
-  font-size: 16px;
+  width: 100%;
+  margin: 0 0 16px 0;
+  padding: 16px;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #111827;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.auth-container button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
+.auth-container input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 1px #111827;
+}
+
+.auth-container input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.auth-container button[type="submit"] {
+  width: 100%;
+  padding: 16px;
+  margin: 24px 0 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #ffffff;
+  background: #111827;
+  border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.025em;
+}
+
+.auth-container button[type="submit"]:hover {
+  background: #1f2937;
+  transform: translateY(-1px);
+}
+
+.auth-container button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Google Login Button Styling */
+.auth-container > div[style*="display"] {
+  margin: 24px 0;
+  display: flex !important;
+  justify-content: center;
+}
+
+/* Style the Google login button container */
+.auth-container > div > div {
+  border: 1px solid #e5e7eb !important;
+  transition: all 0.2s ease !important;
+}
+
+.auth-container > div > div:hover {
+  border-color: #d1d5db !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 .toggle-text {
-  color: #007bff;
+  color: #6b7280;
   cursor: pointer;
-  margin-top: 10px;
+  margin: 24px 0 0 0;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.toggle-text:hover {
+  color: #111827;
 }
 
 .message {
-  color: green;
-  margin-top: 10px;
+  margin: 20px 0 0 0;
+  padding: 12px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 500;
+  border-left: 3px solid #10b981;
+  background: #f0fdf4;
+  color: #065f46;
+  text-align: left;
+}
+
+.message:has-text("❌") {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* Handle error messages specifically */
+.message[style*="color: green"] {
+  border-left: 3px solid #10b981;
+  background: #f0fdf4;
+  color: #065f46 !important;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .auth-container {
+    margin: 40px 20px;
+    padding: 32px 24px;
+  }
+  
+  .auth-container h2 {
+    font-size: 24px;
+  }
+}
+
+/* Loading state for submit button */
+.auth-container button[type="submit"]:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Focus visible for accessibility */
+.auth-container button[type="submit"]:focus-visible,
+.toggle-text:focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 2px;
 }

@@ -2,12 +2,13 @@
 django-cors-headers==4.7.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
+django-allauth==1.19.0
+drf-yasg==1.21.7
 google-auth==2.40.3
+google-auth-oauthlib==1.0.0
 h11==0.16.0
 h2==4.3.0
 hpack==4.1.0
-httpcore==1.0.9
-httpx==0.28.1
 hyperframe==6.1.0
 idna==3.10
 packaging==25.0

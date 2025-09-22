@@ -15,20 +15,20 @@ def create_booking(appointment):
         "Authorization": f"Zoho-oauthtoken {ZOHO_ACCESS_TOKEN}"
     }
 
+    session_duration = appointment.session_plan.duration_minutes if appointment.session_plan else 60
     # Combine date + time
-    start_datetime = datetime.combine(appointment.date, appointment.time)
-    end_datetime = start_datetime + timedelta(minutes=90)  # service duration
+    dt = datetime.combine(appointment.date, appointment.time)
 
-    # Format for Zoho API
-    from_time = start_datetime.strftime("%d-%b-%Y %H:%M:%S")
-    to_time = end_datetime.strftime("%d-%b-%Y %H:%M:%S")
+            # Format Zoho expects: dd-MMM-yyyy HH:mm:ss
+    from_time = dt.strftime("%d-%b-%Y %H:%M:%S")
+    to_time = (dt + timedelta(minutes=session_duration, seconds=1)).strftime("%d-%b-%Y %H:%M:%S") 
 
     # Payload for form-data (must send JSON strings for customer_details and payment_info)
     payload = {
         "service_id": "330945000000041052",
         "staff_id": "330945000000041014",
-        "from_time": "25-Sep-2025 12:30:00",
-        "to_time": "25-Sep-2025 14:00:00",
+        "from_time": from_time,
+        "to_time": to_time,
         "timezone": "Asia/Kolkata",
         "customer_details": str({
             "name": appointment.patient.username,
@@ -47,5 +47,3 @@ def create_booking(appointment):
     response.raise_for_status()
     return response.json()
 
-
-# def get_bookings():

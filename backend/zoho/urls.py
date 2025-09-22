@@ -10,4 +10,6 @@ urlpatterns = [
     path("calendars/", views.list_calendars, name="zoho-calendars"),
     path("calendars/<str:calendar_id>/events/", views.list_events, name="zoho-events"),
     path("calendars/<str:calendar_id>/free-slots/", views.free_slots, name="zoho-free-slots"),
+
+    # path("bookings/fetch-followup/", views.fetch_followup_appointments, name="zoho-fetch-followup-appointments"),
 ]

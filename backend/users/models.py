@@ -34,5 +34,11 @@ class PatientProfile(models.Model):
         blank=True,
         related_name="patients"  
     )
+    onboarding_step = models.IntegerField(default=0)  # track onboarding progress
+    is_onboarded = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return f"{self.user.email} Profile"

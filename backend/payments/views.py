@@ -6,14 +6,14 @@ from django.contrib.auth.decorators import login_required
 from appointments.models import Appointment
 from .models import Payment
 from .services import create_payment_link
-from notifications.services import send_email_notification, send_sms_notification
-from consultations.services import create_meeting
 from consultations.models import Consultation
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import razorpay
 from django.conf import settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework import permissions
 
 razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
@@ -36,56 +36,56 @@ def start_payment(request, appointment_id):
     return JsonResponse({"checkout_url": checkout_url})
 
 
-@csrf_exempt
-def payment_webhook(request):
-    if request.method == "POST":
-        reference_id = request.POST.get("reference_id")   # This maps to Payment.id or Appointment.id
-        zoho_payment_id = request.POST.get("payment_id")  # From Zoho response
-        status = request.POST.get("status")
+# @csrf_exempt
+# def payment_webhook(request):
+#     if request.method == "POST":
+#         reference_id = request.POST.get("reference_id")   # This maps to Payment.id or Appointment.id
+#         zoho_payment_id = request.POST.get("payment_id")  # From Zoho response
+#         status = request.POST.get("status")
 
-        # Here we assume reference_id == Payment.id (you can also map via Appointment.id)
-        payment = get_object_or_404(Payment, id=reference_id)
-        appointment = payment.appointment
+#         # Here we assume reference_id == Payment.id (you can also map via Appointment.id)
+#         payment = get_object_or_404(Payment, id=reference_id)
+#         appointment = payment.appointment
 
-        # Update payment
-        payment.zoho_payment_id = zoho_payment_id
-        payment.status = status
-        payment.save()
+#         # Update payment
+#         payment.zoho_payment_id = zoho_payment_id
+#         payment.status = status
+#         payment.save()
 
-        if status == "success":
-            # ✅ Approve appointment
-            appointment.status = "approved"
-            appointment.save()
+#         if status == "success":
+#             # ✅ Approve appointment
+#             appointment.status = "approved"
+#             appointment.save()
 
-            # ✅ Create consultation if not exists
-            if not hasattr(appointment, "consultation"):
-                meeting_link = create_meeting(appointment)
+#             # ✅ Create consultation if not exists
+#             if not hasattr(appointment, "consultation"):
+#                 meeting_link = create_meeting(appointment)
 
-                consultation = Consultation.objects.create(
-                    appointment=appointment,
-                    meeting_link=meeting_link
-                )
+#                 consultation = Consultation.objects.create(
+#                     appointment=appointment,
+#                     meeting_link=meeting_link
+#                 )
 
-                # ✅ Notify patient
-                send_email_notification(
-                    to_email=appointment.patient.email,
-                    subject="Your Consultation Link",
-                    message=f"Dear {appointment.patient.username},\n\n"
-                            f"Your consultation is confirmed.\nJoin here: {meeting_link}"
-                )
+#                 # ✅ Notify patient
+#                 send_email_notification(
+#                     to_email=appointment.patient.email,
+#                     subject="Your Consultation Link",
+#                     message=f"Dear {appointment.patient.username},\n\n"
+#                             f"Your consultation is confirmed.\nJoin here: {meeting_link}"
+#                 )
 
-                if hasattr(appointment.patient, "profile") and appointment.patient.profile.phone:
-                    send_sms_notification(
-                        to_number=appointment.patient.profile.phone,
-                        message=f"Your consultation is confirmed. Join here: {meeting_link}"
-                    )
+#                 if hasattr(appointment.patient, "profile") and appointment.patient.profile.phone:
+#                     send_sms_notification(
+#                         to_number=appointment.patient.profile.phone,
+#                         message=f"Your consultation is confirmed. Join here: {meeting_link}"
+#                     )
 
-                consultation.notified = True
-                consultation.save()
+#                 consultation.notified = True
+#                 consultation.save()
 
-        return JsonResponse({"status": "ok"})
+#         return JsonResponse({"status": "ok"})
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+#     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 class CreateOrderForAppointmentView(APIView):
@@ -170,3 +170,29 @@ class VerifyPaymentView(APIView):
         appointment.save()
 
         return Response({"success": True, "message": "Payment verified and appointment confirmed"})
+    
+@api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
+def cancel_payment(request):
+    appointment_id = request.data.get("appointment_id")
+    if not appointment_id:
+        return Response({"error": "appointment_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        appointment = Appointment.objects.get(id=appointment_id, patient=request.user)
+
+        # Update Payment
+        payment = Payment.objects.filter(appointment=appointment).last()
+        if payment:
+            payment.status = "failed"  # or "cancelled"
+            payment.save()
+
+        # Update Appointment
+        appointment.status = "cancelled"
+        appointment.save()
+
+        return Response({"message": "Payment cancelled and appointment updated."}, status=status.HTTP_200_OK)
+    except Appointment.DoesNotExist:
+        return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

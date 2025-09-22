@@ -146,6 +146,25 @@ async function handleContinueToPayment() {
           alert("⚠️ Payment verification failed. Please contact support.");
         }
       },
+      modal: {
+    ondismiss: async function () {
+      console.warn("Payment popup closed by user");
+
+      try {
+        // call backend to mark payment & appointment as cancelled
+        await axios.post(
+          "http://localhost:8000/api/payments/cancel-payment/",
+          { appointment_id: appointmentId },
+          { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+        );
+
+        alert("⚠️ Payment cancelled. Your appointment has been cancelled.");
+        navigate("/appointments");
+      } catch (err) {
+        console.error("Error cancelling payment:", err);
+      }
+    },
+  },
       theme: { color: "#3399cc" },
     };
 

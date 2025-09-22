@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ensureConsultationLink, fetchMyAppointments } from "../api/appointments";
 import styles from "./Dashboard.module.css";
+import api from "../api/axios";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -10,13 +11,15 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [hasBookedFirstSession, setHasBookedFirstSession] = useState(false);
   const [consultant, setConsultant] = useState(null);
+  const [isOnboarded, setIsOnboarded] = useState(true); // default true so old users don’t break
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       setError("");
       try {
-        const list = await fetchMyAppointments();
+        const status = ["scheduled", "completed", "follow-up"];
+        const list = await fetchMyAppointments(status);
         const now = new Date();
         const items = (list || []).map((a) => ({
           ...a,
@@ -31,7 +34,7 @@ const Dashboard = () => {
           .filter((a) => a.dt >= now && a.status === "scheduled")
           .sort((a, b) => a.dt - b.dt);
 
-        setUpcoming(upcomingSorted[0] || null);
+        setUpcoming(upcomingSorted || null);
 
         // Mock consultant data - replace with actual API call
         if (hasAnyBooking) {
@@ -43,6 +46,10 @@ const Dashboard = () => {
             image: "/api/placeholder/100/100"
           });
         }
+
+      const { data } = await api.get("api/users/onboarding/");
+
+      setIsOnboarded(data.is_onboarded ?? false);
       } catch (e) {
         setError("Failed to load dashboard data");
       } finally {
@@ -59,10 +66,11 @@ const Dashboard = () => {
   const handleJoinSession = async () => {
     if (!upcoming) return;
     try {
-      const { meeting_link } = await ensureConsultationLink(upcoming.id);
-      if (meeting_link) {
-        window.open(meeting_link, "_blank");
-      }
+      if (!upcoming || !upcoming.meeting_link) {
+    setError("Meeting link not available");
+    return;
+  }
+  window.open(upcoming.meeting_link, "_blank");
     } catch (e) {
       setError("Could not retrieve meeting link");
     }
@@ -105,6 +113,22 @@ const Dashboard = () => {
           </div>
         </section>
       )}
+
+      {!isOnboarded && (
+  <section className={styles.firstSessionSection}>
+    <div className={styles.welcomeCard}>
+      <div className={styles.welcomeIcon}>📝</div>
+      <h2>Complete Your Onboarding</h2>
+      <p>Before booking your first session, please complete the onboarding process.</p>
+      <button
+        className={styles.primaryButton}
+        onClick={() => navigate("/onboarding")}
+      >
+        Go to Onboarding
+      </button>
+    </div>
+  </section>
+)}
 
       {/* Existing User Dashboard */}
       {hasBookedFirstSession && (

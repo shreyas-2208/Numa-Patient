@@ -133,3 +133,64 @@ def fetch_followup_appointments(request):
         return Response({"error": "Appointment not found"}, status=404)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+    
+class RescheduleZohoBookingView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        Reschedule an existing Zoho booking for the logged-in patient.
+        """
+        appointment_id = request.data.get("appointment_id")
+        new_date = request.data.get("date")   # "2025-09-30"
+        new_time = request.data.get("time")   # "14:00:00"
+
+        if not appointment_id or not new_date or not new_time:
+            return Response(
+                {"error": "appointment_id, date, and time are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
+
+        if not appointment.zoho_booking_id:
+            return Response(
+                {"error": "No Zoho booking ID found for this appointment"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Build datetime string for Zoho
+            dt = datetime.strptime(f"{new_date} {new_time}", "%Y-%m-%d %H:%M:%S")
+            from_time = dt.strftime("%d-%b-%Y %H:%M:%S")
+
+            data_dict = {
+                "booking_id": appointment.zoho_booking_id,
+                "customer_email": request.user.email,
+                "reschedule_time": from_time,
+            }
+
+            resp = requests.post(
+                "https://www.zohoapis.in/bookings/v1/json/rescheduleappointment",
+                headers={"Authorization": f"Zoho-oauthtoken {get_access_token()}"},
+                files={"data": json.dumps(data_dict)},
+            )
+
+            resp_json = resp.json()
+
+            if resp_json.get("response", {}).get("status") != "success":
+                return Response(
+                    {"error": "Failed to reschedule in Zoho", "details": resp_json},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Update appointment in DB
+            appointment.date = new_date
+            appointment.time = new_time
+            appointment.status = "rescheduled"
+            appointment.save()
+
+            return Response({"zoho_response": resp_json}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

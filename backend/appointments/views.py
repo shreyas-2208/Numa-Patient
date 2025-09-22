@@ -7,7 +7,9 @@ from .models import Appointment
 from .serializers import AppointmentSerializer
 from plans.models import SessionPlan, PackagePlan
 from payments.models import Payment
-from notifications.services import send_email_notification, send_sms_notification
+from rest_framework.views import APIView
+from datetime import datetime, timedelta
+
 
 class AppointmentCreateView(generics.CreateAPIView):
     serializer_class = AppointmentSerializer
@@ -55,7 +57,16 @@ class AppointmentListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Appointment.objects.filter(patient=self.request.user)
+        user = self.request.user
+        statuses = self.request.query_params.getlist("status")
+
+        qs = Appointment.objects.filter(patient=user).order_by("-date", "-time")
+
+        if statuses:
+            qs = qs.filter(status__in=statuses)
+
+        return qs
+
 
 
 # -------------------------------
@@ -67,3 +78,37 @@ class AppointmentUpdateView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Appointment.objects.filter(patient=self.request.user)
+    
+class AppointmentRescheduleView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        """
+        Reschedule an appointment by updating date & time.
+        """
+        user = request.user
+        appointment = get_object_or_404(Appointment, id=pk, patient=user)
+
+        new_date = request.data.get("date")
+        new_time = request.data.get("time")
+
+        if not new_date or not new_time:
+            return Response(
+                {"error": "Both 'date' and 'time' are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update appointment
+        appointment.date = new_date
+        appointment.time = new_time
+        appointment.status = "rescheduled"
+        appointment.save()
+
+        # Serialize updated appointment
+        data = AppointmentSerializer(appointment).data
+
+        # Optional: send notifications
+        # send_email_notification(user.email, "Your appointment has been rescheduled.")
+        # send_sms_notification(user.profile.phone_number, "Your appointment has been rescheduled.")
+
+        return Response({"appointment": data}, status=status.HTTP_200_OK)

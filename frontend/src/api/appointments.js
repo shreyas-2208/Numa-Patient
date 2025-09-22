@@ -56,8 +56,10 @@ export const createAppointment = async ({ specialization, date, time, plan_id })
 };
 
 // Get user's appointments
-export const fetchMyAppointments = async () => {
-  const response = await axios.get(`/api/appointments/my/`);
+export const fetchMyAppointments = async (status) => {
+  const response = await axios.get(`/api/appointments/my/`, {
+    params: { status },
+  });
   return response.data; // list
 };
 
@@ -66,5 +68,10 @@ export const ensureConsultationLink = async (appointmentId) => {
   const response = await axios.post(`/api/consultations/create/${appointmentId}/`);
   return response.data; // { meeting_link }
 };
+
+export const fetchFollowUpAppointments = async () => {
+  const response = await axios.get(`/api/appointments/follow-ups/`);
+  return response.data; // list
+}
 
 

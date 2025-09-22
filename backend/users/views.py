@@ -8,6 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from decouple import config
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 GOOGLE_CLIENT_ID= config("GOOGLE_CLIENT_ID"),
 TOTAL_ONBOARDING_STEPS = 9  # match frontend total steps
@@ -110,3 +112,49 @@ class PatientOnboardingView(generics.RetrieveUpdateAPIView):
 
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ForgotPasswordSimpleView(APIView):
+    """
+    Accepts email + new password and updates directly if user exists.
+    """
+
+    def post(self, request):
+        email = request.data.get("email")
+        new_password = request.data.get("password")
+
+        if not email or not new_password:
+            return Response({"error": "Email and password are required"}, status=400)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User with this email does not exist"}, status=400)
+
+        # Update password
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"message": "Password updated successfully"}, status=200)
+
+# views.py
+@method_decorator(csrf_exempt, name='dispatch')
+class ResetPasswordView(APIView):
+    permission_classes = []  # public
+
+    def post(self, request):
+        email = request.data.get("email")
+        password1 = request.data.get("password1")
+        password2 = request.data.get("password2")
+
+        if not email or not password1 or not password2:
+            return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if password1 != password2:
+            return Response({"error": "Passwords do not match"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+            user.set_password(password1)
+            user.save()
+            return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

@@ -15,6 +15,10 @@ export const googleLogin = async (token) => {
   return res.data;
 };
 
+export const resetPassword = (data) => {
+  return axios.post(`${API_URL}api/users/reset-password/`, data);
+}
+
 export const setAuthToken = (token) => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;

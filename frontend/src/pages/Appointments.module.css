@@ -1,31 +1,273 @@
 .wrap {
-  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .title {
-  margin: 0 0 12px 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 32px 0;
+  color: #1e293b;
+  letter-spacing: -0.025em;
+  text-align: center;
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+  color: #64748b;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   padding: 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 0;
+  color: #64748b;
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyStateText {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
 }
 
 .list {
   margin: 0;
-  padding-left: 16px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appointmentItem {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.appointmentItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.appointmentItem:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateX(4px);
+}
+
+.appointmentHeader {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sessionName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.statusBadge.confirmed {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.statusBadge.pending {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.statusBadge.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.statusBadge.completed {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.appointmentDetails {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.dateTime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateIcon, .timeIcon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.ctaContainer {
+  margin-top: 40px;
+  text-align: center;
 }
 
 .cta {
-  margin-top: 20px;
-  padding: 10px 15px;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   border: none;
-  border-radius: 8px;
-  background: #111827;
-  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+.cta:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
 
+.cta:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .wrap {
+    padding: 24px 16px;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 24px;
+  }
+  
+  .card {
+    padding: 24px;
+  }
+  
+  .appointmentItem {
+    padding: 20px;
+  }
+  
+  .appointmentHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .sessionName {
+    min-width: unset;
+    margin-bottom: 8px;
+  }
+  
+  .appointmentDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .cta {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .appointmentItem {
+    padding: 16px;
+  }
+}

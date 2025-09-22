@@ -1,185 +1,474 @@
 .contactContainer {
   min-height: 100vh;
-  background: #fafafa;
-  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
 }
 
 .heroSection {
-  background: white;
-  padding: 4rem 2rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+  padding: 80px 0 60px;
   text-align: center;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .heroContent {
-  max-width: 600px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .heroTitle {
-  font-size: 2.75rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1rem;
-  letter-spacing: -0.025em;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  color: white;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .heroSubtitle {
-  font-size: 1.125rem;
-  color: #6b7280;
-  font-weight: 400;
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
   line-height: 1.6;
 }
 
 .contentWrapper {
-  max-width: 800px;
+  padding: 60px 20px 80px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  position: relative;
+  z-index: 1;
 }
 
-.contactSection {
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+.leftColumn {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 30px;
 }
 
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Card Base Styles */
 .contactCard,
-.aboutCard {
-  background: white;
-  border-radius: 12px;
-  padding: 2.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+.faqCard,
+.aboutCard,
+.emergencyCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 8px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.contactCard::before,
+.faqCard::before,
+.aboutCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 24px 24px 0 0;
+}
+
+.emergencyCard {
+  border-left: 4px solid #ef4444;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(254, 242, 242, 0.9));
+}
+
+.contactCard:hover,
+.faqCard:hover,
+.aboutCard:hover,
+.emergencyCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.15),
+    0 12px 30px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.cardHeader {
+  margin-bottom: 28px;
 }
 
 .cardHeader h2 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 0.5rem;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
 }
 
 .cardHeader p {
   color: #6b7280;
-  font-size: 1rem;
-  margin: 0 0 2rem 0;
+  margin: 0;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
+/* Contact Methods */
 .contactMethods {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px;
 }
 
 .contactMethod {
   display: flex;
   align-items: flex-start;
-  gap: 1.25rem;
-  padding: 1.75rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  border: 1px solid #f3f4f6;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
 }
 
 .contactMethod:hover {
-  background: #f3f4f6;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  border-color: rgba(102, 126, 234, 0.2);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .methodIcon {
-  width: 44px;
-  height: 44px;
-  background: #f3f4f6;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid #e5e7eb;
 }
 
 .methodIcon svg {
-  width: 20px;
-  height: 20px;
-  color: #4b5563;
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.methodDetails {
+  flex: 1;
 }
 
 .methodDetails h3 {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 0.5rem 0;
-}
-
-.contactLink {
-  font-size: 1rem;
-  color: #374151;
-  text-decoration: none;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 0.25rem;
-  transition: color 0.2s ease;
-}
-
-.contactLink:hover {
-  color: #1f2937;
+  margin: 0 0 6px 0;
 }
 
 .methodDetails span {
-  font-size: 0.875rem;
-  color: #9ca3af;
   display: block;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 4px;
 }
 
+.contactLink {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  display: block;
+  font-size: 1rem;
+}
+
+.contactLink:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+/* FAQ Styles */
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.faqItem {
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.faqItem:hover {
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.faqItem.active {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.03);
+}
+
+.faqQuestion {
+  width: 100%;
+  padding: 18px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.faqQuestion:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.faqIcon {
+  width: 20px;
+  height: 20px;
+  color: #667eea;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.faqItem.active .faqIcon {
+  transform: rotate(180deg);
+}
+
+.faqAnswer {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.faqItem.active .faqAnswer {
+  max-height: 200px;
+}
+
+.faqAnswer p {
+  padding: 0 20px 20px 20px;
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* About Card */
 .aboutCard h3 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 1.25rem;
+  margin: 0 0 16px 0;
 }
 
 .aboutCard p {
   color: #4b5563;
-  line-height: 1.7;
-  margin-bottom: 1rem;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+}
+
+.aboutCard p:last-of-type {
+  margin-bottom: 24px;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  transform: translateX(4px);
+}
+
+.featureIcon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.featureIcon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.feature h4 {
   font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 2px 0;
 }
 
-.aboutCard p:last-child {
-  margin-bottom: 0;
+.feature span {
+  font-size: 0.85rem;
+  color: #6b7280;
 }
 
-/* Responsive Design */
+/* Emergency Card */
+.emergencyHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.emergencyIcon {
+  width: 48px;
+  height: 48px;
+  background: #ef4444;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.emergencyIcon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.emergencyHeader h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin: 0 0 4px 0;
+}
+
+.emergencyHeader p {
+  font-size: 0.9rem;
+  color: #7f1d1d;
+  margin: 0;
+}
+
+.emergencyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emergencyItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: rgba(254, 242, 242, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+.emergencyItem strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.emergencyItem span {
+  font-size: 0.85rem;
+  color: #991b1b;
+}
+
+.emergencyLink {
+  color: #dc2626;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.emergencyLink:hover {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .heroSection {
-    padding: 3rem 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .heroTitle {
-    font-size: 2.25rem;
-  }
-  
-  .heroSubtitle {
-    font-size: 1rem;
+    padding: 60px 0 40px;
   }
   
   .contentWrapper {
-    padding: 0 1rem;
+    padding: 40px 16px 60px;
   }
   
   .contactCard,
-  .aboutCard {
-    padding: 1.75rem;
+  .faqCard,
+  .aboutCard,
+  .emergencyCard {
+    padding: 24px 20px;
+  }
+  
+  .cardHeader h2 {
+    font-size: 1.3rem;
   }
   
   .contactMethod {
-    padding: 1.25rem;
+    padding: 16px;
   }
   
   .methodIcon {
@@ -188,6 +477,29 @@
   }
   
   .methodIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .faqQuestion {
+    padding: 16px;
+    font-size: 0.95rem;
+  }
+  
+  .features {
+    gap: 12px;
+  }
+  
+  .feature {
+    padding: 12px;
+  }
+  
+  .featureIcon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .featureIcon svg {
     width: 18px;
     height: 18px;
   }
@@ -198,17 +510,56 @@
     font-size: 2rem;
   }
   
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+  
   .contactCard,
-  .aboutCard {
-    padding: 1.25rem;
+  .faqCard,
+  .aboutCard,
+  .emergencyCard {
+    padding: 20px 16px;
   }
   
   .contactMethod {
-    padding: 1rem;
-    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
   }
-  
-  .cardHeader h2 {
-    font-size: 1.5rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contactCard,
+.faqCard,
+.aboutCard,
+.emergencyCard {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.leftColumn > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.leftColumn > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.rightColumn > *:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.rightColumn > *:nth-child(2) {
+  animation-delay: 0.4s;
 }

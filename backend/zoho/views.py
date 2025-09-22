@@ -1,6 +1,12 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .services import auth, calendar
+from appointments.models import Appointment
+import requests
+import json
+from datetime import datetime, timedelta
+
+ZOHO_TOKEN = "1000.xxxxxxx"  # replace with your actual Zoho access token
 
 @api_view(["GET"])
 def auth_test(request):
@@ -30,12 +36,10 @@ def list_events(request, calendar_id):
 
 @api_view(["GET"])
 def free_slots(request, calendar_id, date=None):
-    # date = request.GET.get("date") \
-    # date = "2025-09-17"  # format YYYY-MM-DD
-    # if not date:
-    #     return Response({"error": "Missing 'date' query param"}, status=400)
     try:
         slots = calendar.get_free_slots_for_range(calendar_id, date)
         return Response({"slots": slots})
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+
+# ----------------- New Endpoint -----------------

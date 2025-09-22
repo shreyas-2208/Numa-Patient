@@ -10,7 +10,7 @@ from google.auth.transport import requests
 from decouple import config
 
 GOOGLE_CLIENT_ID= config("GOOGLE_CLIENT_ID"),
-
+TOTAL_ONBOARDING_STEPS = 9  # match frontend total steps
 # Register endpoint
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -94,3 +94,19 @@ class PatientOnboardingView(generics.RetrieveUpdateAPIView):
         obj, created = PatientProfile.objects.get_or_create(user=self.request.user)
         return obj    
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            # Check if onboarding is complete
+             # match frontend total steps
+            current_step = request.data.get("onboarded_step", 0)
+
+            if current_step >= TOTAL_ONBOARDING_STEPS:
+                serializer.save(is_onboarded=True, onboarding_step=current_step)
+            else:
+                serializer.save(onboarding_step=current_step)
+
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,16 +1,14 @@
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import indiaCities from "./cities-in-india.json";
 import { useNavigate } from "react-router-dom";
 import "./Onboarding.css";
 import api from "../../api/axios";
-import { fetchSessionPlans } from "../../api/plans";
-import PlanSelector from "../../components/PlanSelector/PlanSelector";
 
 const INDIA_CITIES = [...indiaCities, "Others/Outside India"];
 
 const ISSUES = [
   "Feeling sad",
-  "Low mood", 
+  "Low mood",
   "Anxiety",
   "Stress",
   "Insomnia",
@@ -98,11 +96,11 @@ const validateAge = (dob) => {
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear(); // Changed from const to let
   const monthDiff = today.getMonth() - birthDate.getMonth();
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--; // This line was causing the error - trying to modify const
   }
-  
+
   return age >= 5 && age <= 120;
 };
 
@@ -152,14 +150,14 @@ const saveOnboarding = async (form) => {
   }
 };
 
+
 export default function Onboarding() {
   const navigate = useNavigate();
 
   // Animation state for smooth transitions
   const [fadeDir, setFadeDir] = useState('in');
-  const [viewStep, setViewStep] = useState(0);
-  
-  const [step, setStep] = useState(0);
+  const [viewStep, setViewStep] = useState(null);
+  const [step, setStep] = useState(null);
   const [form, setForm] = useState({
     name: "",
     dob: null,
@@ -177,11 +175,9 @@ export default function Onboarding() {
     bookingTempId: "",
     paymentStatus: "init",
     meetingLink: "",
+    is_onboarded: false
   });
 
-  const [plans, setPlans] = useState([]);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
   // Smooth step transitions with fade animation
@@ -194,47 +190,47 @@ export default function Onboarding() {
     return () => clearTimeout(timeout);
   }, [step]);
 
-  useEffect(() => {
-    async function loadPlans() {
-      try {
-        const plansData = await fetchSessionPlans();
-        setPlans(plansData);
-      } catch (err) {
-        console.error("Error fetching plans:", err);
-        setError("Failed to load available plans. Please try again.");
+  const loadOnboarding = async () => {
+  try {
+    const { data } = await api.get("api/users/onboarding/"); // your endpoint
+    if (data) {
+      setForm((prev) => ({
+        ...prev,
+        ...data,
+      }));
+
+      if (data.is_onboarded) {
+        // If fully onboarded, go straight to dashboard
+        navigate("/dashboard");
+      } else if (data.onboarded_step != null) {
+        // Resume at saved step
+        setStep(data.onboarded_step);
+        setViewStep(data.onboarded_step);
+      } else {
+        setStep(0);
+        setViewStep(0);
       }
     }
-    loadPlans();
+  } catch (err) {
+    console.error("Error loading onboarding:", err);
+  }
+};
+
+  useEffect(() => {
+    loadOnboarding();
   }, []);
 
-  const saveDraft = useCallback(async () => {
+  const saveDraft = (async () => {
     try {
       await saveOnboarding(form);
       console.log("Draft saved!");
     } catch (err) {
       console.error("Error saving draft:", err);
     }
-  }, [form]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => saveDraft(), 1000);
-    return () => clearTimeout(timeout);
-  }, [saveDraft]);
-
-  useEffect(() => {
-    const loadDraft = async () => {
-      try {
-        const { data } = await api.get("api/users/onboarding/");
-        setForm((prev) => ({ ...prev, ...data }));
-      } catch (err) {
-        console.error("Error loading onboarding draft:", err);
-      }
-    };
-    loadDraft();
-  }, []);
+  });
 
   const totalSteps = 10;
-  const progressPct = (step / (totalSteps - 1)) * 100;
+  const progressPct = step!=null? (step / (totalSteps - 1)) * 100 : 0;
 
   const setField = (k, v) => {
     setForm((prev) => ({ ...prev, [k]: v }));
@@ -243,8 +239,14 @@ export default function Onboarding() {
       setFieldErrors(prev => ({ ...prev, [k]: null }));
     }
   };
-  
-  const goNext = () => setStep((s) => Math.min(s + 1, totalSteps - 1));
+
+  const goNext = async () => {
+    const nextStep = Math.min(step + 1, totalSteps - 1);
+    setStep(nextStep);
+    setViewStep(nextStep);
+    form.onboarded_step = nextStep;
+    await saveDraft();
+  };
   const goBack = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleDOB = (v) => {
@@ -261,12 +263,12 @@ export default function Onboarding() {
     const value = e.target.value;
     // Allow only letters, spaces, hyphens, and apostrophes
     const filteredValue = value.replace(/[^a-zA-Z\s'-]/g, '');
-    setField("username", filteredValue);
-    
+    setField("name", filteredValue);
+
     if (filteredValue && !validateName(filteredValue)) {
-      setFieldErrors(prev => ({ 
-        ...prev, 
-        username: "Name must be 2-50 characters and contain only letters, spaces, hyphens, and apostrophes" 
+      setFieldErrors(prev => ({
+        ...prev,
+        name: "Name must be 2-50 characters and contain only letters, spaces, hyphens, and apostrophes"
       }));
     }
   };
@@ -276,11 +278,11 @@ export default function Onboarding() {
     const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
     if (value.length <= 10) {
       setField("phone_number", value);
-      
+
       if (value && !validatePhone(value)) {
-        setFieldErrors(prev => ({ 
-          ...prev, 
-          phone_number: "Enter a valid 10-digit Indian mobile number starting with 6-9" 
+        setFieldErrors(prev => ({
+          ...prev,
+          phone_number: "Enter a valid 10-digit Indian mobile number starting with 6-9"
         }));
       }
     }
@@ -292,21 +294,21 @@ export default function Onboarding() {
       const newReasons = exists
         ? prev.reason_for_visit.filter((i) => i !== issue)
         : [...prev.reason_for_visit, issue];
-      
+
       // Limit to maximum 5 selections
       if (newReasons.length > 5) {
-        setFieldErrors(prev => ({ 
-          ...prev, 
-          reason_for_visit: "Please select maximum 5 concerns" 
+        setFieldErrors(prev => ({
+          ...prev,
+          reason_for_visit: "Please select maximum 5 concerns"
         }));
         return prev;
       }
-      
+
       // Clear error when user makes valid selection
       if (fieldErrors.reason_for_visit) {
         setFieldErrors(prev => ({ ...prev, reason_for_visit: null }));
       }
-      
+
       return {
         ...prev,
         reason_for_visit: newReasons,
@@ -320,16 +322,16 @@ export default function Onboarding() {
       preferred_time_of_day: form.preferred_time_of_day,
       ageGroup: form.ageGroup,
     });
-    
+
     const assignedDoctor = chosenArr[0];
     setField("doctor", assignedDoctor);
-    
+
     // Save the final draft with doctor assignment
-    const updatedForm = { ...form, doctor: assignedDoctor };
+    const updatedForm = { ...form, doctor: assignedDoctor, onboarded_step: step };
     try {
       await saveOnboarding(updatedForm);
       console.log("Final onboarding saved with doctor assignment");
-      
+
       // Redirect to dashboard immediately after doctor assignment
       navigate("/dashboard");
     } catch (err) {
@@ -338,26 +340,14 @@ export default function Onboarding() {
     }
   };
 
-  // Save draft and exit from package step onwards
-  // const finishLater = async () => {
-  //   try {
-  //     await saveDraft(); // save current form to backend
-  //   } catch (err) {
-  //     console.error("Failed to save draft:", err);
-  //   }
-  //   goToDashboard(); // actually call the function to navigate
-  // };
 
   const canNext = () => {
-    const isValidPhone = (v) =>
-      /^\d{10}$/.test(String(v || "").replace(/\D/g, ""));
-
+  
     switch (step) {
       case 0:
         return true;
       case 1:
-        return (form.name || "").trim().length > 1; // name
-        return validateName(form.username) && !fieldErrors.username;
+        return validateName(form.name) && !fieldErrors.name;
       case 2:
         return validatePhone(form.phone_number) && !fieldErrors.phone_number;
       case 3:
@@ -418,40 +408,40 @@ export default function Onboarding() {
         )}
 
         {viewStep === 1 && (
-  <>
-    <h2>What's your name?</h2>
-    <p className="hint">This helps personalize communication.</p>
+          <>
+            <h2>What's your name?</h2>
+            <p className="hint">This helps personalize communication.</p>
 
-    <div className="input-box">
-      <label>Full name *</label>
-      <input
-        type="text"
-        value={form.username || ""}
-        onChange={handleNameChange}
-        placeholder="Enter your full name"
-        maxLength={50}
-        minLength={2}
-        pattern="[a-zA-Z\s'-]{2,50}"
-        title="Name should contain only letters, spaces, hyphens, and apostrophes"
-        required
-        autoComplete="name"
-        spellCheck={false}
-      />
-      {fieldErrors.username && (
-        <p className="error-text">{fieldErrors.username}</p>
-      )}
-    </div>
+            <div className="input-box">
+              <label>Full name *</label>
+              <input
+                type="text"
+                value={form.name || ""}
+                onChange={handleNameChange}
+                placeholder="Enter your full name"
+                maxLength={50}
+                minLength={2}
+                pattern="[a-zA-Z\s'-]{2,50}"
+                title="Name should contain only letters, spaces, hyphens, and apostrophes"
+                required
+                autoComplete="name"
+                spellCheck={false}
+              />
+              {fieldErrors.name && (
+                <p className="error-text">{fieldErrors.name}</p>
+              )}
+            </div>
 
-    <div className="nav">
-      <button className="btn secondary" onClick={goBack}>
-        Back
-      </button>
-      <button className="btn" onClick={goNext} disabled={!canNext()}>
-        Next
-      </button>
-    </div>
-  </>
-)}
+            <div className="nav">
+              <button className="btn secondary" onClick={goBack}>
+                Back
+              </button>
+              <button className="btn" onClick={goNext} disabled={!canNext()}>
+                Next
+              </button>
+            </div>
+          </>
+        )}
 
 
         {viewStep === 2 && (

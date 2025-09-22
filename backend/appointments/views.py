@@ -49,9 +49,7 @@ class AppointmentCreateView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED
         )
-# -------------------------------
-# List Appointments for Patient
-# -------------------------------
+
 class AppointmentListView(generics.ListAPIView):
     serializer_class = AppointmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -60,12 +58,12 @@ class AppointmentListView(generics.ListAPIView):
         user = self.request.user
         statuses = self.request.query_params.getlist("status")
 
-        qs = Appointment.objects.filter(patient=user).order_by("-date", "-time")
+        appointments = Appointment.objects.filter(patient=user).order_by("-date", "-time")
 
         if statuses:
-            qs = qs.filter(status__in=statuses)
+            appointments = appointments.filter(status__in=statuses)
 
-        return qs
+        return appointments
 
 
 

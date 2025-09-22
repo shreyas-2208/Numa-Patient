@@ -6,6 +6,7 @@ import api from "../api/axios";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
   const [upcoming, setUpcoming] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ const Dashboard = () => {
       setLoading(true);
       setError("");
       try {
-        const status = ["scheduled", "completed", "follow-up"];
+        const status = ["scheduled", "rescheduled"];
         const list = await fetchMyAppointments(status);
         const now = new Date();
         const items = (list || []).map((a) => ({
@@ -34,17 +35,18 @@ const Dashboard = () => {
           .filter((a) => a.dt >= now && a.status === "scheduled")
           .sort((a, b) => a.dt - b.dt);
 
+        const nextAppointment = upcomingSorted[0] || null;
         setUpcoming(upcomingSorted || null);
 
         // Mock consultant data - replace with actual API call
-        if (hasAnyBooking) {
+        if (nextAppointment && nextAppointment.doctor) {
           setConsultant({
-            name: "Dr. Sarah Johnson",
-            specialization: "Clinical Psychology",
-            experience: "8 years",
-            rating: 4.8,
-            image: "/api/placeholder/100/100"
-          });
+          name: nextAppointment.doctor.name,
+          specialization: nextAppointment.doctor.specialization,
+          experience: nextAppointment.doctor.experience || "N/A", // optional field
+          rating: nextAppointment.doctor.rating || 0, // optional
+          image: nextAppointment.doctor.image || "/api/placeholder/100/100",
+        });
         }
 
       const { data } = await api.get("api/users/onboarding/");
@@ -70,7 +72,7 @@ const Dashboard = () => {
     setError("Meeting link not available");
     return;
   }
-  window.open(upcoming.meeting_link, "_blank");
+  window.open(upcoming.zoho_meeting_link, "_blank");
     } catch (e) {
       setError("Could not retrieve meeting link");
     }
@@ -205,7 +207,7 @@ const Dashboard = () => {
             <div className={styles.actionGrid}>
               <button 
                 className={styles.actionCard}
-                onClick={() => navigate('/book-appointment')}
+                onClick={() => navigate('/appointments/book')}
               >
                 <span className={styles.actionIcon}>📅</span>
                 <span>Book Session</span>

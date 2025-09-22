@@ -83,7 +83,7 @@ const DOCTORS = [
 const validateName = (name) => {
   if (!name) return false; // handle null or empty
   const nameRegex = /^[a-zA-Z\s'-]{2,50}$/;
-  return nameRegex.test(name.trim());
+  return nameRegex.test((name || "").trim());
 };
 
 

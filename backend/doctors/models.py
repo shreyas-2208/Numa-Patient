@@ -26,10 +26,10 @@ class Doctor(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     specialization = models.CharField(max_length=20, choices=SPECIALIZATION_CHOICES)
     bio = models.TextField()
-    calendar_id = models.CharField(max_length=255, null=True, blank=True)
+    zoho_calendar_id = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=10)
     email = models.EmailField(default="")
-    staff_id = models.CharField(max_length=100, null=True, blank=True)
+    zoho_staff_id = models.CharField(max_length=100, null=True, blank=True)
 
     last_assigned = models.DateTimeField(null=True, blank=True)
     def __str__(self):

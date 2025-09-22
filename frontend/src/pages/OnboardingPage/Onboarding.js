@@ -356,8 +356,8 @@ export default function Onboarding() {
       case 0:
         return true;
       case 1:
-        return (form.name || "").trim().length > 1; // name
-        return validateName(form.username) && !fieldErrors.username;
+        return (form.username || "").trim().length > 1; // name
+        // return validateName(form.username) && !fieldErrors.username;
       case 2:
         return validatePhone(form.phone_number) && !fieldErrors.phone_number;
       case 3:

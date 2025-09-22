@@ -142,6 +142,8 @@ class RescheduleZohoBookingView(APIView):
         Reschedule an existing Zoho booking for the logged-in patient.
         """
         appointment_id = request.data.get("appointment_id")
+        # zoho_booking_id = request.data.get("zoho_booking_id")
+        zoho_service_id = "330945000000041052"  # Example service ID
         new_date = request.data.get("date")   # "2025-09-30"
         new_time = request.data.get("time")   # "14:00:00"
 
@@ -151,7 +153,7 @@ class RescheduleZohoBookingView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
+        appointment = get_object_or_404(Appointment, id=appointment_id)
 
         if not appointment.zoho_booking_id:
             return Response(
@@ -162,18 +164,19 @@ class RescheduleZohoBookingView(APIView):
         try:
             # Build datetime string for Zoho
             dt = datetime.strptime(f"{new_date} {new_time}", "%Y-%m-%d %H:%M:%S")
-            from_time = dt.strftime("%d-%b-%Y %H:%M:%S")
+            rescheduled_time = dt.strftime("%d-%b-%Y %H:%M:%S")
 
-            data_dict = {
+            form_data = {
                 "booking_id": appointment.zoho_booking_id,
-                "customer_email": request.user.email,
-                "reschedule_time": from_time,
+                "service_id": zoho_service_id,
+                # "customer_email": request.user.email,
+                "start_time": rescheduled_time,
             }
-
+            print(form_data)
             resp = requests.post(
                 "https://www.zohoapis.in/bookings/v1/json/rescheduleappointment",
                 headers={"Authorization": f"Zoho-oauthtoken {get_access_token()}"},
-                files={"data": json.dumps(data_dict)},
+                data=form_data,
             )
 
             resp_json = resp.json()

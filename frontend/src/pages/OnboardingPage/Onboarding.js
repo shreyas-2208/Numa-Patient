@@ -82,7 +82,7 @@ const DOCTORS = [
 // Input validation functions
 const validateName = (name) => {
   const nameRegex = /^[a-zA-Z\s'-]{2,50}$/;
-  return nameRegex.test(name.trim());
+  return nameRegex.test((name || "").trim());
 };
 
 const validatePhone = (phone) => {

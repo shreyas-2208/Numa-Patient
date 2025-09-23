@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ensureConsultationLink, fetchMyAppointments } from "../api/appointments";
+import { getAssignedDoctor, getDoctor } from "../api/doctors";
 import styles from "./Dashboard.module.css";
 import api from "../api/axios";
 
@@ -12,54 +13,73 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [hasBookedFirstSession, setHasBookedFirstSession] = useState(false);
   const [consultant, setConsultant] = useState(null);
-  const [isOnboarded, setIsOnboarded] = useState(true); // default true so old users don't break
+  const [isOnboarded, setIsOnboarded] = useState(true);
+  const [assignedDoctor, setAssignedDoctor] = useState(null); // default true so old users don't break
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       setError("");
       try {
-        const status = ["scheduled", "rescheduled"];
-        const list = await fetchMyAppointments(status);
-        const now = new Date();
-        const items = (list || []).map((a) => ({
-          ...a,
-          dt: new Date(`${a.date}T${a.time}`),
-        }));
+         const statusFilter = ["scheduled", "rescheduled"];
+      const list = await fetchMyAppointments(statusFilter);
 
-        // Check if user has booked their first session
-        const hasAnyBooking = list && list.length > 0;
-        setHasBookedFirstSession(hasAnyBooking);
+      // Map each appointment to include a combined Date object
+      const items = (list || []).map((a) => ({
+        ...a,
+        dt: new Date(`${a.date}T${a.time}`), // combine date + time
+      }));
 
-        const upcomingSorted = items
-          .filter((a) => a.dt >= now && a.status === "scheduled")
-          .sort((a, b) => a.dt - b.dt);
+      // Check if user has booked any session
+      const hasAnyBooking = items.length > 0;
+      setHasBookedFirstSession(hasAnyBooking);
 
-        const nextAppointment = upcomingSorted[0] || null;
-        setUpcoming(upcomingSorted || null);
+      // Filter upcoming appointments
+      const now = new Date();
+      const upcomingSorted = items
+        .filter(
+          (a) => a.dt >= now && statusFilter.includes(a.status.toLowerCase())
+        )
+        .sort((a, b) => a.dt - b.dt);
+
+      // Set the next upcoming appointment (first one)
+      const nextAppointment = upcomingSorted[0] || null;
+      setUpcoming(nextAppointment);
+      console.log("Next appointment:", nextAppointment);
 
         // Get onboarding status
         const { data } = await api.get("api/users/onboarding/");
         setIsOnboarded(data.is_onboarded ?? false);
-
+        const assignedDoctorId = data.assigned_doctor;
         // Fetch consultant data if onboarded (regardless of booking status)
         if (data.is_onboarded) {
           // If there's an upcoming appointment, use that doctor info
-          if (nextAppointment && nextAppointment.doctor) {
-            setConsultant({
-              name: nextAppointment.doctor.name,
-              specialization: nextAppointment.doctor.specialization,
-              experience: nextAppointment.doctor.experience || "N/A",
-              rating: nextAppointment.doctor.rating || 0,
-              image: nextAppointment.doctor.image || "/api/placeholder/100/100",
-            });
-          } else {
-            // TODO: Fetch assigned consultant from onboarding/profile API
-            // For now, you might want to add an API call here to get the assigned consultant
-            // Example: const consultantData = await api.get("api/users/assigned-consultant/");
-            // setConsultant(consultantData.data);
+          // if (nextAppointment && nextAppointment.doctor) {
+          //   setConsultant({
+          //     name: nextAppointment.doctor.name,
+          //     specialization: nextAppointment.doctor.specialization,
+          //     experience: nextAppointment.doctor.experience || "N/A",
+          //     rating: nextAppointment.doctor.rating || 0,
+          //     image: nextAppointment.doctor.image || "/api/placeholder/100/100",
+          //   });
+          // } else {
+            try {
+      const doc = await getDoctor(assignedDoctorId);
+      setAssignedDoctor({
+  name: doc.name,                   // backend `name`
+  specialization: doc.specialization,
+  age: doc.age,
+  gender: doc.gender,
+  email: doc.email,
+  phone_number: doc.phone_number,
+  experience: doc.years_of_experience || "N/A",
+  image: doc.image || "/api/placeholder/100/100", // if your backend doesn't send an image
+});
+    } catch (err) {
+      console.error("Failed to fetch assigned doctor:", err);
+    }
           }
-        }
+        // }
 
       } catch (e) {
         setError("Failed to load dashboard data");
@@ -77,7 +97,7 @@ const Dashboard = () => {
   const handleJoinSession = async () => {
     if (!upcoming) return;
     try {
-      if (!upcoming || !upcoming.meeting_link) {
+      if (!upcoming || !upcoming.zoho_meeting_link) {
         setError("Meeting link not available");
         return;
       }
@@ -128,22 +148,22 @@ const Dashboard = () => {
       {isOnboarded && (
         <>
           {/* Consultant Information - Show after onboarding completion */}
-          {consultant && (
+          {true && (
             <section className={styles.consultantSection}>
               <div className={styles.consultantCard}>
                 <div className={styles.consultantInfo}>
-                  <img 
-                    src={consultant.image} 
-                    alt={consultant.name}
+                  <img
+                    src={assignedDoctor.image}
+                    alt={assignedDoctor.name}
                     className={styles.consultantImage}
                   />
                   <div className={styles.consultantDetails}>
                     <h3>Your Assigned Consultant</h3>
-                    <h2>{consultant.name}</h2>
-                    <p>{consultant.specialization}</p>
+                    <h2>{assignedDoctor.name}</h2>
+                    <p>{assignedDoctor.specialization}</p>
                     <div className={styles.consultantMeta}>
-                      <span>⭐ {consultant.rating}</span>
-                      <span>📅 {consultant.experience} experience</span>
+                      <span>⭐ {assignedDoctor.rating}</span>
+                      <span>📅 {assignedDoctor.experience} experience</span>
                     </div>
                   </div>
                 </div>
@@ -171,33 +191,44 @@ const Dashboard = () => {
 
           {/* Upcoming Appointments - Show for users who have booked sessions */}
           {hasBookedFirstSession && (
-            <section className={styles.appointmentsSection}>
-              <h2>Upcoming Sessions</h2>
-              {upcoming ? (
-                <div className={styles.appointmentCard}>
-                  <div className={styles.appointmentInfo}>
-                    <div className={styles.appointmentDate}>
-                      <span className={styles.day}>
-                        {new Date(upcoming.date).getDate()}
-                      </span>
-                      <span className={styles.month}>
-                        {new Date(upcoming.date).toLocaleDateString(undefined, { month: 'short' })}
-                      </span>
-                    </div>
-                    <div className={styles.appointmentDetails}>
-                      <h3>Consultation Session</h3>
-                      <p>📅 {new Date(upcoming.date).toLocaleDateString()}</p>
-                      <p>🕐 {upcoming.time}</p>
-                      <p>👩‍⚕️ {consultant?.name || 'Your consultant'}</p>
-                    </div>
-                  </div>
-                  <button 
-                    className={styles.joinButton}
-                    onClick={handleJoinSession}
-                  >
-                    Join Session
-                  </button>
-                </div>
+  <section className={styles.appointmentsSection}>
+    <h2>Upcoming Sessions</h2>
+    {upcoming ? (
+      (() => {
+        // Combine date + time into a single Date object
+        const upcomingDateTime = new Date(`${upcoming.date}T${upcoming.time}`);
+        const day = upcomingDateTime.getDate();
+        const month = upcomingDateTime.toLocaleDateString(undefined, { month: 'short' });
+        const formattedDate = upcomingDateTime.toLocaleDateString();
+        const formattedTime = upcomingDateTime.toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+
+        return (
+          <div className={styles.appointmentCard}>
+            <div className={styles.appointmentInfo}>
+              <div className={styles.appointmentDate}>
+                <span className={styles.day}>{day}</span>
+                <span className={styles.month}>{month}</span>
+              </div>
+              <div className={styles.appointmentDetails}>
+                <h3>Upcoming Consultation Session</h3>
+                <p>👩‍⚕️ {upcoming?.doctor.name || 'Your consultant'}</p>
+                <p>📅 {formattedDate}</p>
+                <p>🕐 {formattedTime}</p>
+              </div>
+            </div>
+            <button 
+              className={styles.joinButton}
+              onClick={handleJoinSession}
+            >
+              Join Session
+            </button>
+          </div>
+        );
+      })()
               ) : (
                 <div className={styles.noAppointments}>
                   <div className={styles.emptyIcon}>📅</div>

@@ -26,6 +26,8 @@ class Doctor(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     specialization = models.CharField(max_length=20, choices=SPECIALIZATION_CHOICES)
     bio = models.TextField()
+    languages = models.JSONField(default=list, blank=True)
+    years_of_experience = models.PositiveIntegerField(blank=True, null=True)
     zoho_calendar_id = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=10)
     email = models.EmailField(default="")

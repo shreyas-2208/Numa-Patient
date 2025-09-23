@@ -76,4 +76,11 @@ export const fetchFollowUpAppointments = async () => {
   return response.data; // list
 }
 
-
+export const rescheduleAppointment = async ({ appointment_id, date, time }) => {
+  const response = await axios.post("/bookings/reschedule/", {
+    appointment_id,
+    date,
+    time,
+  });
+  return response.data;
+};

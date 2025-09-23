@@ -310,45 +310,69 @@ function BookAppointment() {
             </div>
 
             {/* Time Selection */}
-            {selectedDate && (
-              <div className={styles.timeSelection}>
-                <h3 className={styles.selectionTitle}>
-                  Available Times
-                  <span className={styles.slotsCount}>
-                    {(slotsByDate[selectedDate] || []).length} slots available
-                  </span>
-                </h3>
-                
-                {(slotsByDate[selectedDate] || []).length === 0 ? (
-                  <div className={styles.emptyState}>
-                    <svg className={styles.emptyIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p>No time slots available</p>
-                    <span>Please select a different date</span>
-                  </div>
-                ) : (
-                  <div className={styles.timeGrid}>
-                    {(slotsByDate[selectedDate] || []).map((slot) => {
-                      const label = typeof slot === "string" ? slot : `${slot.start}-${slot.end}`;
-                      const value = typeof slot === "string" ? slot : slot.start;
+            {/* Time Selection */}
+{selectedDate && (
+  <div className={styles.timeSelection}>
+    <h3 className={styles.selectionTitle}>
+      Available Times
+      <span className={styles.slotsCount}>
+        {(slotsByDate[selectedDate] || []).length} slots available
+      </span>
+    </h3>
 
-                      return (
-                        <button
-                          key={label}
-                          onClick={() => setSelectedTime(value)}
-                          className={`${styles.timeSlot} ${
-                            value === selectedTime ? styles.timeSlotSelected : ""
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+    {(slotsByDate[selectedDate] || []).length === 0 ? (
+      <div className={styles.emptyState}>
+        <svg
+          className={styles.emptyIcon}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+        <p>No time slots available</p>
+        <span>Please select a different date</span>
+      </div>
+    ) : (
+      <div className={styles.timeGrid}>
+        {(slotsByDate[selectedDate] || []).map((slot) => {
+          const rawTime = typeof slot === "string" ? slot : slot.start;
+
+          // Convert HH:mm or HH:mm:ss to AM/PM
+          const [hour, minute] = rawTime.split(":");
+          const date = new Date();
+          date.setHours(Number(hour), Number(minute), 0);
+
+          const label = date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+
+          const value = rawTime;
+
+          return (
+            <button
+              key={label}
+              onClick={() => setSelectedTime(value)}
+              className={`${styles.timeSlot} ${
+                value === selectedTime ? styles.timeSlotSelected : ""
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
+
           </div>
         </div>
 

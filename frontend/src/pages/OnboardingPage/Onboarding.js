@@ -3,6 +3,8 @@ import indiaCities from "./cities-in-india.json";
 import { useNavigate } from "react-router-dom";
 import "./Onboarding.css";
 import api from "../../api/axios";
+import { assignDoctor } from "../../api/doctors";
+
 
 const INDIA_CITIES = [...indiaCities, "Others/Outside India"];
 
@@ -116,29 +118,29 @@ function inferAgeGroup(dobISO) {
   return age < 18 ? "child" : "adult";
 }
 
-function assignDoctor({
-  preferred_session_timings,
-  preferred_time_of_day,
-  ageGroup,
-}) {
-  const preferWeekends = preferred_session_timings === "Weekends";
-  const preferWeekdays = preferred_session_timings === "Weekdays";
-  const preferMorning = preferred_time_of_day === "Morning";
-  const preferEvening = preferred_time_of_day === "Evening";
+// function assignDoctor({
+//   preferred_session_timings,
+//   preferred_time_of_day,
+//   ageGroup,
+// }) {
+//   const preferWeekends = preferred_session_timings === "Weekends";
+//   const preferWeekdays = preferred_session_timings === "Weekdays";
+//   const preferMorning = preferred_time_of_day === "Morning";
+//   const preferEvening = preferred_time_of_day === "Evening";
 
-  const pool = DOCTORS.filter((d) => {
-    const dayOk = preferWeekends
-      ? d.weekend
-      : preferWeekdays
-        ? d.weekday
-        : true;
-    const timeOk = preferMorning ? d.morning : preferEvening ? d.evening : true;
-    const ageOk = ageGroup === "child" ? d.acceptsChild : true;
-    return dayOk && timeOk && ageOk;
-  });
+//   const pool = DOCTORS.filter((d) => {
+//     const dayOk = preferWeekends
+//       ? d.weekend
+//       : preferWeekdays
+//         ? d.weekday
+//         : true;
+//     const timeOk = preferMorning ? d.morning : preferEvening ? d.evening : true;
+//     const ageOk = ageGroup === "child" ? d.acceptsChild : true;
+//     return dayOk && timeOk && ageOk;
+//   });
 
-  return pool.length > 0 ? pool : DOCTORS;
-}
+//   return pool.length > 0 ? pool : DOCTORS;
+// }
 
 const saveOnboarding = async (form) => {
   try {
@@ -171,7 +173,7 @@ export default function Onboarding() {
     reason_for_visit: [],
     preferred_session_timings: "Flexible",
     preferred_time_of_day: "Flexible",
-    doctor: null,
+    assigned_doctor: null,
     package: "",
     slotId: "",
     bookingTempId: "",
@@ -319,17 +321,12 @@ export default function Onboarding() {
   };
 
   const handleAssignDoctor = async () => {
-    const chosenArr = assignDoctor({
-      preferred_session_timings: form.preferred_session_timings,
-      preferred_time_of_day: form.preferred_time_of_day,
-      ageGroup: form.ageGroup,
-    });
+    const assignedDoctor = await assignDoctor(form.reason_for_visit, form.preferred_languages);
 
-    const assignedDoctor = chosenArr[0];
-    setField("doctor", assignedDoctor);
+    setField("assigned_doctor", assignedDoctor);
 
     // Save the final draft with doctor assignment
-    const updatedForm = { ...form, doctor: assignedDoctor, onboarded_step: step };
+    const updatedForm = { ...form, assigned_doctor: assignedDoctor.doctor_id, onboarded_step: step };
     try {
       await saveOnboarding(updatedForm);
       console.log("Final onboarding saved with doctor assignment");

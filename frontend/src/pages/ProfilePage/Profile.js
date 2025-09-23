@@ -21,7 +21,7 @@ function Profile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!accessToken) return; // no token, can't fetch
+      if (!accessToken) return;
       try {
         const response = await axios.get(`${API_URL}/api/users/profile/`, {
           headers: {
@@ -86,7 +86,13 @@ function Profile() {
       <form onSubmit={handleSubmit}>
         <div className={styles.field}>
           <label>Full Name</label>
-          <input type="text" name="full_name" value={profile.name} onChange={handleChange} disabled={!isEditing} />
+          <input
+            type="text"
+            name="full_name"
+            value={profile.name}
+            onChange={handleChange}
+            disabled={!isEditing}
+          />
         </div>
 
         <div className={styles.field}>
@@ -96,18 +102,23 @@ function Profile() {
 
         <div className={styles.field}>
           <label>Age</label>
-          <input type="number" name="age" value={profile.age || ""} onChange={handleChange} disabled={!isEditing} />
+          <input
+            type="number"
+            name="age"
+            value={profile.age || ""}
+            onChange={handleChange}
+            disabled={!isEditing}
+          />
         </div>
 
         <div className={styles.field}>
           <label>Gender</label>
-          <input type="text" name="gender" value={profile.gender}
-          onChange={handleChange} disabled={!isEditing} />
+          <input type="text" name="gender" value={profile.gender} disabled />
         </div>
 
         <div className={styles.field}>
           <label>Phone Number</label>
-          <input type="text" name="phone_number" value={profile.phone_number || ""} onChange={handleChange} disabled={!isEditing} />
+          <input type="text" name="phone_number" value={profile.phone_number || ""} disabled />
         </div>
 
         {isEditing && (

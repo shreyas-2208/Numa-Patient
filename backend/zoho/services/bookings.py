@@ -15,7 +15,10 @@ def create_booking(appointment):
         "Authorization": f"Zoho-oauthtoken {ZOHO_ACCESS_TOKEN}"
     }
 
-    session_duration = appointment.session_plan.duration_minutes if appointment.session_plan else 60
+    session_duration = appointment.session_plan.duration_minutes 
+    amount_paid = appointment.session_plan.price
+    zoho_service_id=appointment.session_plan.zoho_service_id
+    zoho_staff_id=appointment.doctor.zoho_staff_id
     # Combine date + time
     dt = datetime.combine(appointment.date, appointment.time)
 
@@ -25,8 +28,8 @@ def create_booking(appointment):
 
     # Payload for form-data (must send JSON strings for customer_details and payment_info)
     payload = {
-        "service_id": "330945000000041052",
-        "staff_id": "330945000000041014",
+        "service_id": zoho_service_id,
+        "staff_id": zoho_staff_id,
         "from_time": from_time,
         "to_time": to_time,
         "timezone": "Asia/Kolkata",
@@ -37,12 +40,11 @@ def create_booking(appointment):
         }).replace("'", '"'),
         "notes": f"Appointment ID: {appointment.id}",
         "payment_info": str({
-            "cost_paid": "0.00",
+            "cost_paid": amount_paid,
             "currency": "INR"
         }).replace("'", '"')
     }
 
-    # Use files=payload for form-data
     response = requests.post(url, headers=headers, data=payload)
     response.raise_for_status()
     return response.json()

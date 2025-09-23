@@ -188,7 +188,7 @@ def cancel_payment(request):
             payment.save()
 
         # Update Appointment
-        appointment.status = "cancelled"
+        appointment.status = "Payment Failed"
         appointment.save()
 
         return Response({"message": "Payment cancelled and appointment updated."}, status=status.HTTP_200_OK)

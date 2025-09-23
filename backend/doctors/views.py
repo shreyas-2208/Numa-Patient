@@ -93,3 +93,19 @@ class AssignDoctorView(APIView):
             return Response(serializer.data)
         except Doctor.DoesNotExist:
             return Response({"detail": "No doctor assigned to this user."}, status=404)
+        
+class AssignDoctorBySpecializationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, specialization=None):
+        doctor = assign_doctor_by_specialization(specialization)
+        if not doctor:
+            return Response({"error": "No doctor available"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            "doctor_id": doctor.id,
+            "doctor_name": doctor.name,
+            "specialization": doctor.specialization,
+            "email": doctor.email,
+            "phone_number": doctor.phone_number,
+        }, status=status.HTTP_200_OK)

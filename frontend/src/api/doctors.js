@@ -21,3 +21,12 @@ export const getDoctor = async (doctorId) => {
   const res = await axios.get(`/api/doctors/${doctorId}/`);
   return res.data;
 }
+
+export const assignDoctorBySpecialization = async (specialization) => {
+  const res = await axios.post(
+    "/api/doctors/assign-by-specialization/",
+    { specialization },
+  );
+
+  return res.data;
+}

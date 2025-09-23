@@ -5,11 +5,12 @@ import Onboarding from "./pages/OnboardingPage/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout/Layout";
 import Appointments from "./pages/Appointments";
-import BookAppointment from "./pages/BookAppointment";
+import BookAppointment from "./pages/BookAppointment/BookAppointment";
 import PaymentReturn from "./pages/PaymentReturn";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ContactUs from "./pages/ContactUs/ContactUs";
 import { isTokenValid } from "./utils/auth";
+import { AppointmentsProvider } from "./contexts/AppointmentsContext";
 
 function App() {
   const isLoggedIn = isTokenValid();
@@ -34,9 +35,21 @@ function App() {
       >
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/appointments" element={<Appointments />} />
+
+        {/* Wrap appointments routes with AppointmentsProvider */}
+        <Route
+          path="/appointments/*"
+          element={
+            <AppointmentsProvider>
+              <Routes>
+                <Route index element={<Appointments />} />
+                <Route path="book" element={<BookAppointment />} />
+              </Routes>
+            </AppointmentsProvider>
+          }
+        />
+
         <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/appointments/book" element={<BookAppointment />} />
         <Route path="/payment/return" element={<PaymentReturn />} />
       </Route>
 

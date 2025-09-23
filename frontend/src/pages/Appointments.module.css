@@ -85,7 +85,7 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 24px;
+  padding: 18px;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
@@ -162,7 +162,7 @@
 .appointmentDetails {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 13px;
   color: #64748b;
   font-size: 0.95rem;
   font-weight: 500;
@@ -175,15 +175,34 @@
   gap: 8px;
 }
 
-.dateIcon, .timeIcon {
+.dateIcon, .timeIcon, .createdAtIcon {
   width: 16px;
   height: 16px;
   opacity: 0.7;
 }
 
 .ctaContainer {
-  margin-top: 40px;
+  margin-top: -1px;
   text-align: center;
+  margin-bottom: 21px;
+}
+
+.separator {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid #ddd; 
+}
+
+.createdAtContainer {
+  /* margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b; */
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cta {

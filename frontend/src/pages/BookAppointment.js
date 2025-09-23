@@ -63,6 +63,7 @@ function BookAppointment() {
         // pick the first date with available slots, else fallback to first date
         const firstDateWithSlots =
           dates.find((d) => (data?.[d] || []).length > 0) || dates[0];
+
         setSelectedDate(firstDateWithSlots);
       } catch (e) {
         console.error("Error loading slots:", e);
@@ -77,7 +78,7 @@ function BookAppointment() {
   useEffect(() => {
     async function loadPlans() {
       try {
-        const plansData = await fetchSessionPlans(specialization);
+        const plansData = await fetchSessionPlans();
         setPlans(plansData);
       } catch (err) {
         console.error("Error fetching plans:", err);
@@ -85,7 +86,7 @@ function BookAppointment() {
       }
     }
     loadPlans();
-  }, [specialization]);
+  }, []);
 
   // Update step based on selections
   useEffect(() => {

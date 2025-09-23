@@ -32,6 +32,12 @@ class Doctor(models.Model):
     phone_number = models.CharField(max_length=10)
     email = models.EmailField(default="")
     zoho_staff_id = models.CharField(max_length=100, null=True, blank=True)
+    zoho_calendar_id = models.CharField(max_length=255, null=True, blank=True)
+    image = models.ImageField(
+        upload_to="doctors/",  # will store under MEDIA_ROOT/doctors/
+        null=True,
+        blank=True
+    )
 
     last_assigned = models.DateTimeField(null=True, blank=True)
     def __str__(self):

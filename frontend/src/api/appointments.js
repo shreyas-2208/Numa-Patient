@@ -84,3 +84,147 @@ export const rescheduleAppointment = async ({ appointment_id, date, time }) => {
   });
   return response.data;
 };
+
+export const getDoctorAvailableSlots = async (doctorId, daysAhead = 14) => {
+  const response = await axios.get(`/api/doctors/${doctorId}/available-slots/`, {
+    params: { days: daysAhead },
+  });
+  return response.data; // Expected format: [{date: "2024-01-15", time: "10:00"}, ...]
+};
+
+// Alternative: Fetch doctor's calendar slots using Zoho integration
+export const fetchDoctorSlotsForRange = async (doctorId, startDate) => {
+  const response = await axios.get(`/api/doctors/${doctorId}/calendar-slots/`, {
+    params: { start_date: startDate },
+  });
+  return response.data.slots || {}; // Expected format: {"2024-01-15": ["10:00", "11:00"], ...}
+};
+
+// Fetch doctor's free slots for a specific date
+export const fetchDoctorFreeSlotsForDate = async (doctorId, date) => {
+  const response = await axios.get(`/api/doctors/${doctorId}/free-slots/`, {
+    params: { date },
+  });
+  return response.data; // Expected format: {date: "2024-01-15", slots: ["10:00", "11:00"]}
+};
+
+// Fetch two weeks of slots for a doctor (similar to your existing pattern)
+export const fetchDoctorTwoWeekSlots = async (doctorId, startDate) => {
+  const start = startDate ? new Date(startDate) : new Date();
+  const requests = [];
+  
+  for (let i = 0; i < 14; i += 1) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    requests.push(fetchDoctorFreeSlotsForDate(doctorId, iso));
+  }
+  
+  const results = await Promise.all(requests);
+  
+  // Normalize to { [date]: slots[] }
+  const map = {};
+  results.forEach((res) => {
+    if (res && res.date && Array.isArray(res.slots)) {
+      map[res.date] = res.slots;
+    } else {
+      // Handle different response formats
+      Object.keys(res || {}).forEach((k) => {
+        if (Array.isArray(res[k])) {
+          map[k] = res[k];
+        }
+      });
+    }
+  });
+  
+  return map;
+};
+
+// Enhanced reschedule appointment function
+export const rescheduleAppointmentEnhanced = async (appointmentId, newSlot) => {
+  const response = await axios.patch(`/api/appointments/${appointmentId}/reschedule/`, {
+    date: newSlot.date,
+    time: newSlot.time
+  });
+  return response.data; // Updated appointment object
+};
+
+// Alternative reschedule using your existing pattern
+export const rescheduleAppointmentV2 = async ({ appointment_id, date, time }) => {
+  const response = await axios.post("/api/appointments/reschedule/", {
+    appointment_id,
+    date,
+    time,
+  });
+  return response.data;
+};
+
+// PAYMENT APIs
+
+// Create Razorpay order for appointment payment
+export const createPaymentOrder = async (appointmentId, planData) => {
+  const response = await axios.post(`/api/payments/create-order/${appointmentId}/`, {
+    plan_id: planData.plan_id || planData.id,
+    amount: parseFloat(planData.price || planData.amount)
+  });
+  return response.data; // { order_id, razorpay_key, amount, currency, ... }
+};
+
+// Verify Razorpay payment
+export const verifyRazorpayPayment = async (paymentData) => {
+  const response = await axios.post('/api/payments/verify-payment/', {
+    razorpay_order_id: paymentData.razorpay_order_id,
+    razorpay_payment_id: paymentData.razorpay_payment_id,
+    razorpay_signature: paymentData.razorpay_signature,
+  });
+  return response.data;
+};
+
+// Cancel payment for appointment
+export const cancelAppointmentPayment = async (appointmentId) => {
+  const response = await axios.post('/api/payments/cancel-payment/', {
+    appointment_id: appointmentId
+  });
+  return response.data;
+};
+
+// Get payment status for appointment
+export const getPaymentStatus = async (appointmentId) => {
+  const response = await axios.get(`/api/payments/status/${appointmentId}/`);
+  return response.data; // { status: "pending" | "completed" | "failed", payment_details: ... }
+};
+
+// Initiate payment for existing appointment (pay later functionality)
+export const initiatePaymentForAppointment = async (appointmentId, planData) => {
+  const response = await axios.post(`/api/appointments/${appointmentId}/payment/`, {
+    plan_id: planData.plan_id || planData.id,
+    amount: parseFloat(planData.price || planData.amount)
+  });
+  return response.data; // { payment_url, order_id, ... }
+};
+
+// Get appointment payment details
+export const getAppointmentPaymentDetails = async (appointmentId) => {
+  const response = await axios.get(`/api/appointments/${appointmentId}/payment-details/`);
+  return response.data; // { amount_due, payment_status, plan_details, ... }
+};
+
+// UTILITY APIs
+
+// Check if appointment can be rescheduled
+export const canRescheduleAppointment = async (appointmentId) => {
+  const response = await axios.get(`/api/appointments/${appointmentId}/can-reschedule/`);
+  return response.data; // { can_reschedule: boolean, reason: string }
+};
+
+// Get doctor's calendar ID (if needed for Zoho integration)
+export const getDoctorCalendarId = async (doctorId) => {
+  const response = await axios.get(`/api/doctors/${doctorId}/calendar/`);
+  return response.data; // { calendar_id, calendar_name, ... }
+};
+
+// Fetch appointment details with payment and reschedule info
+export const fetchAppointmentDetails = async (appointmentId) => {
+  const response = await axios.get(`/api/appointments/${appointmentId}/details/`);
+  return response.data; // Full appointment object with payment and reschedule history
+};

@@ -20,4 +20,17 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Redirect to login/auth page
+      window.location.href = "/auth"; // or "/login"
+      // Optionally, you can also clear local storage tokens
+      localStorage.removeItem("access_token");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from zoho.services.auth import get_access_token
 
 ZOHO_BOOKINGS_BASE_URL = "https://www.zohoapis.in/bookings/v1/json"
-ZOHO_ACCESS_TOKEN = get_access_token()
+# ZOHO_ACCESS_TOKEN = get_access_token()
 
 def create_booking(appointment):
     """
@@ -12,7 +12,7 @@ def create_booking(appointment):
     url = f"{ZOHO_BOOKINGS_BASE_URL}/appointment"  # endpoint must be plural
 
     headers = {
-        "Authorization": f"Zoho-oauthtoken {ZOHO_ACCESS_TOKEN}"
+        "Authorization": f"Zoho-oauthtoken {get_access_token()}"
     }
 
     session_duration = appointment.session_plan.duration_minutes 

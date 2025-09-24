@@ -22,11 +22,10 @@ export const getDoctor = async (doctorId) => {
   return res.data;
 }
 
-export const assignDoctorBySpecialization = async (specialization) => {
-  const res = await axios.post(
-    "/api/doctors/assign-by-specialization/",
-    { specialization },
-  );
+export const getAssignedDoctorBySpecialization = async (specialization) => {
+  const res = await axios.get(`/api/doctors/assigned-by-specialization/`, {
+    params: { specialization }, // <-- sent as query param
+  });
 
   return res.data;
 }

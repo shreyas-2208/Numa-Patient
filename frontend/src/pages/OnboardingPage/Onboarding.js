@@ -30,9 +30,9 @@ const ISSUES = [
 const LANGUAGES = [
   "English",
   "Hindi",
+  "Kannada",
   "Tamil",
   "Telugu",
-  "Kannada",
   "Malayalam",
   "Marathi",
   "Gujarati",
@@ -42,43 +42,8 @@ const LANGUAGES = [
   "Odia",
   "Assamese",
   "Konkani",
+  "Tulu",
   "Other",
-];
-
-const DOCTORS = [
-  {
-    id: "doc1",
-    name: "Dr. A",
-    role: "Psychiatrist",
-    bio: "Adult mood and anxiety specialist.",
-    weekday: true,
-    weekend: true,
-    morning: true,
-    evening: false,
-    acceptsChild: false,
-  },
-  {
-    id: "doc2",
-    name: "Dr. B",
-    role: "Psychiatrist",
-    bio: "Child & adolescent care; ADHD and anxiety.",
-    weekday: true,
-    weekend: false,
-    morning: false,
-    evening: true,
-    acceptsChild: true,
-  },
-  {
-    id: "doc3",
-    name: "Dr. C",
-    role: "Psychologist",
-    bio: "CBT for stress, work burnout, and relationships.",
-    weekday: true,
-    weekend: true,
-    morning: true,
-    evening: true,
-    acceptsChild: false,
-  },
 ];
 
 // Input validation functions
@@ -167,7 +132,7 @@ export default function Onboarding() {
     dob: null,
     ageGroup: null,
     gender: "",
-    phone_number: null,
+    phone_number: "",
     city: "",
     preferred_languages: "English",
     reason_for_visit: [],

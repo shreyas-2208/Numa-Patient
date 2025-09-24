@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import Profile from "./pages/ProfilePage/Profile";
 import Onboarding from "./pages/OnboardingPage/Onboarding";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/DashboardPage/Dashboard";
 import Layout from "./components/Layout/Layout";
 import Appointments from "./pages/Appointments";
 import BookAppointment from "./pages/BookAppointment/BookAppointment";

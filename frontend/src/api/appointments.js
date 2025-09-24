@@ -44,6 +44,11 @@ export const fetchSlotsForRange = async (calendarId, startDate) => {
   return response.data.slots || {};
 };
 
+export const fetchSlotsForDoctor = async (doctorId) => {
+  const response = await axios.get(`/api/doctors/${doctorId}/calendar-slots/`);
+  return response.data.slots || {}; 
+};
+
 // Create appointment and receive payment link
 export const createAppointment = async ({ specialization, date, time, plan_id }) => {
   const response = await axios.post(`/api/appointments/create/`, {
@@ -62,6 +67,11 @@ export const fetchMyAppointments = async (statuses = []) => {
   statuses.forEach((s) => params.append("status", s));
 
   const response = await axios.get(`/api/appointments/my/`, { params });
+  return response.data; // list of appointments
+};
+
+export const fetchUpcomingAppointments = async () => {
+  const response = await axios.post(`/api/bookings/fetch-followups/`);
   return response.data; // list of appointments
 };
 

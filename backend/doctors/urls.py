@@ -1,6 +1,6 @@
 # doctors/urls.py
 from django.urls import path
-from .views import DoctorListView, DoctorDetailView, DoctorCreateView, UserDoctorView, AssignDoctorView, AssignDoctorBySpecializationView
+from .views import DoctorListView, DoctorDetailView, DoctorCreateView, UserDoctorView, AssignDoctorView, AssignedDoctorBySpecializationView, DoctorAvailableSlotsView
 
 urlpatterns = [
     path("", DoctorListView.as_view(), name="doctor-list"),
@@ -10,6 +10,7 @@ urlpatterns = [
     # added for testing
     path("me/", UserDoctorView.as_view(), name="user-doctor"),
     path("assign/", AssignDoctorView.as_view(), name="assign-doctor"),
-    path("assign-by-specialization/", AssignDoctorBySpecializationView.as_view(), name="assign-doctor-by-specialization"),
+    path("assigned-by-specialization/", AssignedDoctorBySpecializationView.as_view(), name="assign-doctor-by-specialization"),
+    path("freeSlots/", DoctorAvailableSlotsView.as_view(), name="doctor-available-slots"),
 ]
     

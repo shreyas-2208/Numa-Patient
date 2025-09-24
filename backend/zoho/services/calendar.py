@@ -15,25 +15,6 @@ def get_calendars():
     resp.raise_for_status()
     return resp.json().get("calendars", [])
 
-# def get_events(calendar_id, from_date=None, to_date=None):
-#     """
-#     Get events from a calendar between from_date and to_date.
-#     Dates in 'YYYY-MM-DD' format.
-#     """
-#     token = get_access_token()
-#     headers = {"Authorization": f"Zoho-oauthtoken {token}"}
-
-#     if not from_date:
-#         from_date = datetime.now().strftime("%Y-%m-%d")
-#     if not to_date:
-#         to_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
-
-#     params = {"fromDate": from_date, "toDate": to_date}
-#     resp = requests.get(f"{BASE_URL}/calendars/{calendar_id}/events", headers=headers )
-#     # todo: add params=params back
-#     resp.raise_for_status()
-#     return resp.json().get("events", [])
-
 def get_events_for_range(calendar_id, from_date=None, to_date=None):
     """
     Get events from a calendar between from_date and to_date.
@@ -212,3 +193,4 @@ def get_free_slots_for_range(calendar_id, start_date=None, days=14):
         })
 
     return slots_by_date
+

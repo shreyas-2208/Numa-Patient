@@ -14,12 +14,13 @@ class Doctor(models.Model):
         ("psychologist", "Psychologist"),
     ]
 
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="assigned_doctor",
-        unique=True
-    )
+    # user = models.OneToOneField(
+    #     settings.AUTH_USER_MODEL,
+    #     on_delete=models.CASCADE,
+    #     related_name="assigned_doctor",
+    #     unique=True,
+    #     null=True
+    # )
 
     name = models.CharField(max_length=100)
     age = models.PositiveIntegerField()  
@@ -32,7 +33,7 @@ class Doctor(models.Model):
     phone_number = models.CharField(max_length=10)
     email = models.EmailField(default="")
     zoho_staff_id = models.CharField(max_length=100, null=True, blank=True)
-    zoho_calendar_id = models.CharField(max_length=255, null=True, blank=True)
+    max_patients=models.PositiveIntegerField(null=True, blank=True)
     image = models.ImageField(
         upload_to="doctors/",  # will store under MEDIA_ROOT/doctors/
         null=True,

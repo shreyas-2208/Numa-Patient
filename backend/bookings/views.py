@@ -11,6 +11,7 @@ from appointments.models import Appointment
 from zoho.services.bookings import create_booking  # your helper function
 from django.conf import settings
 from zoho.services.auth import get_access_token
+from zoho.services.bookings import fetch_appointments
 
 class CreateZohoBookingView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -101,19 +102,15 @@ def fetch_followup_appointments(request):
     """
     Fetch follow-up appointments from Zoho Bookings for a specific appointment.
     """
-    appointment_id = request.data.get("appointment_id")
-    if not appointment_id:
-        return Response({"error": "Missing 'appointment_id' in request body"}, status=400)
-
+  
     try:
-        appointment = Appointment.objects.get(id=appointment_id)
-        dt = datetime.combine(appointment.date, appointment.time)
-
+        dt=datetime.now()
+        user_email = request.user.email
         from_time = dt.strftime("%d-%b-%Y %H:%M:%S")
         to_time = (dt + timedelta(days=15)).strftime("%d-%b-%Y %H:%M:%S")  # fetch next 15 days
 
         data_dict = {
-            "customer_email": "nidhip03@gmail.com",
+            "customer_email": user_email,
             "from_time": from_time,
             "to_time": to_time
         }
@@ -121,18 +118,13 @@ def fetch_followup_appointments(request):
         payload = {
             "data": json.dumps(data_dict)
         }
-        resp = requests.post(
-            "https://www.zohoapis.in/bookings/v1/json/fetchappointment",
-            headers={"Authorization": f"Zoho-oauthtoken {get_access_token()}"},
-            data=payload
-        )
 
-        return Response(resp.json(), status=resp.status_code)
+        resp = fetch_appointments(payload)
+      
+        return Response(resp, status=status.HTTP_200_OK)
 
-    except Appointment.DoesNotExist:
-        return Response({"error": "Appointment not found"}, status=404)
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class RescheduleZohoBookingView(APIView):
     permission_classes = [permissions.IsAuthenticated]

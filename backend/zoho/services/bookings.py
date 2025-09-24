@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from zoho.services.auth import get_access_token
 
 ZOHO_BOOKINGS_BASE_URL = "https://www.zohoapis.in/bookings/v1/json"
-# ZOHO_ACCESS_TOKEN = get_access_token()
 
 def create_booking(appointment):
     """
@@ -49,3 +48,13 @@ def create_booking(appointment):
     response.raise_for_status()
     return response.json()
 
+def fetch_appointments(payload):
+    url =f"{ZOHO_BOOKINGS_BASE_URL}/fetchappointment"
+    response = requests.post(
+            url,
+            headers={"Authorization": f"Zoho-oauthtoken {get_access_token()}"},
+            data=payload
+        )
+
+    response.raise_for_status()
+    return response.json()

@@ -11,6 +11,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [upcoming, setUpcoming] = useState(null);
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -48,6 +49,7 @@ const Dashboard = () => {
           .filter((a) => a.dt >= now && statusFilter.includes(a.status?.toLowerCase()))
           .sort((a, b) => a.dt - b.dt);
 
+        setUpcomingAppointments(upcomingSorted);
         const nextAppointment = upcomingSorted[0] || null;
         setUpcoming(nextAppointment);
         setHasBookedFirstSession(upcomingSorted.length > 0);

@@ -22,6 +22,7 @@ export const getDoctor = async (doctorId) => {
   return res.data;
 }
 
+
 export const getAssignedDoctorBySpecialization = async (specialization) => {
   const res = await axios.get(`/api/doctors/assigned-by-specialization/`, {
     params: { specialization }, // <-- sent as query param
@@ -29,3 +30,10 @@ export const getAssignedDoctorBySpecialization = async (specialization) => {
 
   return res.data;
 }
+
+export const fetchFreeSlots = async (doctorId, plan_duration) => {
+  const res = await axios.get(`/api/doctors/freeSlots/`, {
+    params: { doctor_id: doctorId, plan_duration: plan_duration },
+  });
+  return res.data;
+} 

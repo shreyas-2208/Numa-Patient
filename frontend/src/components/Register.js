@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 // import Dashboard from "../pages/Dashboard";
 
+API_URL = process.env.BACKEND_API_URL;
+
 function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -26,7 +28,7 @@ function Register() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/auth/registration/",
+        `${API_URL}/auth/registration/`,
         formData
       );
 

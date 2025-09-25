@@ -1,6 +1,9 @@
 // src/components/PaymentHandler.js
 import axios from "axios";
 
+const API_URL = process.env.BACKEND_API_URL || "http://127.0.0.1:8000";
+
+
 const PaymentHandler = async ({
   appointmentId,
   plan,
@@ -17,7 +20,7 @@ const PaymentHandler = async ({
     // 1. Create Razorpay order
     const requestData = { plan_id: plan.id, amount };
     const { data } = await axios.post(
-      `http://localhost:8000/api/payments/create-order/${appointmentId}/`,
+      `${API_URL}/api/payments/create-order/${appointmentId}/`,
       requestData,
       {
         headers: {
@@ -35,7 +38,7 @@ const PaymentHandler = async ({
       handler: async function (response) {
         try {
           await axios.post(
-            "http://localhost:8000/api/payments/verify-payment/",
+            `${API_URL}/api/payments/verify-payment/`,
             {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -58,7 +61,7 @@ const PaymentHandler = async ({
         ondismiss: async function () {
           try {
             await axios.post(
-              "http://localhost:8000/api/payments/cancel-payment/",
+              `${API_URL}/api/payments/cancel-payment/`,
               { appointment_id: appointmentId },
               {
                 headers: {

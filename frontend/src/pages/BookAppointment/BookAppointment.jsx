@@ -7,7 +7,7 @@ import SlotSelection from "./SlotSelection";
 import PaymentHandler from "./PaymentHandler";
 import styles from "./BookAppointment.module.css";
 import axios from "../../api/axios";
-import { getAssignedDoctorBySpecialization } from "../../api/doctors";
+import { getAssignedDoctorBySpecialization, fetchFreeSlots } from "../../api/doctors";
 
 
 function formatDateLabel(dateStr) {
@@ -83,7 +83,9 @@ export default function BookAppointment() {
     const assignedDoctor = await getAssignedDoctorBySpecialization(plan.doctor_type);
     
     setAssignDoctor(assignedDoctor);
-    setPlanDuration(plan.duration);
+    setPlanDuration(plan.duration_minutes);
+    console.log(plan)
+    console.log(planDuration)
     setDoctorCalendarId(assignedDoctor.zoho_calendar_id);
     setSelectedDate("");
     setSelectedTime("");
@@ -96,7 +98,8 @@ export default function BookAppointment() {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchSlotsForRange(calendarId, dates[0], 14);
+      // const data = await fetchSlotsForRange(calendarId, dates[0], 14);
+      const data = await fetchFreeSlots(assignedDoctor.id, planDuration);
       setSlotsByDate(data || {});
     } catch (err) {
       console.error(err);

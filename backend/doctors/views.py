@@ -141,23 +141,15 @@ class DoctorAvailableSlotsView(APIView):
 
         doctor = get_object_or_404(Doctor, id=doctor_id)
 
-        slots = get_doctor_available_slots(doctor, plan_duration)
+        freeSlots = get_doctor_available_slots(doctor, plan_duration)
 
+        # print(slots)
         return Response(
             {
                 "doctor_id": doctor.id,
                 "doctor_name": doctor.name,
                 "specialization": doctor.specialization,
-                "slots": {
-                    date.strftime("%Y-%m-%d"): [
-                        {
-                            "start": slot["start"].isoformat(),
-                            "end": slot["end"].isoformat(),
-                        }
-                        for slot in slot_list
-                    ]
-                    for date, slot_list in slots.items()
-                },
+                "slots": freeSlots,
             },
             status=status.HTTP_200_OK,
         )

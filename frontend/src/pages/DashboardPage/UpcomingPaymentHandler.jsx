@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API_URL = process.env.BACKEND_API_URL || "http://127.0.0.1:8000";
+
 export default function PaymentHandler({ appointment, onSuccess, onFailure }) {
   const [processing, setProcessing] = useState(false);
 
@@ -15,7 +17,7 @@ export default function PaymentHandler({ appointment, onSuccess, onFailure }) {
     try {
       // 1️⃣ Create Razorpay order
       const { data } = await axios.post(
-        `http://localhost:8000/api/payments/create-order/${appointment.id}/`,
+        `${API_URL}/api/payments/create-order/${appointment.id}/`,
         { amount: appointment.amount_due },
         { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
       );
@@ -29,7 +31,7 @@ export default function PaymentHandler({ appointment, onSuccess, onFailure }) {
         handler: async (response) => {
           try {
             await axios.post(
-              "http://localhost:8000/api/payments/verify-payment/",
+              `${API_URL}/api/payments/verify-payment/`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,

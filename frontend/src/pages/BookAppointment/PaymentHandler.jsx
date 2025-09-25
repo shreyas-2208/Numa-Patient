@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import styles from "./BookAppointment.module.css";
 import { useAppointments } from "../../contexts/AppointmentsContext";
 
+const API_URL = process.env.BACKEND_API_URL || "http://127.0.0.1:8000";
+
 export default function PaymentHandler({
   selectedPlan,
   selectedDate,
@@ -20,7 +22,7 @@ export default function PaymentHandler({
     setError("");
     try {
       const appointmentRes = await axios.post(
-        "http://localhost:8000/api/appointments/create/",
+        `${API_URL}/api/appointments/create/`,
         {
           specialization,
           date: selectedDate,
@@ -38,7 +40,7 @@ export default function PaymentHandler({
       }
 
       const { data } = await axios.post(
-        `http://localhost:8000/api/payments/create-order/${appointmentId}/`,
+        `${API_URL}/api/payments/create-order/${appointmentId}/`,
         { plan_id: selectedPlan.id, amount },
         { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
       );
@@ -51,7 +53,7 @@ export default function PaymentHandler({
         handler: async (response) => {
           try {
             await axios.post(
-              "http://localhost:8000/api/payments/verify-payment/",
+              `${API_URL}/api/payments/verify-payment/`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -61,7 +63,7 @@ export default function PaymentHandler({
             );
 
             await axios.post(
-              "http://localhost:8000/api/bookings/create/",
+              `${API_URL}/api/bookings/create/`,
               { appointment_id: appointmentId },
               { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
             );
@@ -78,7 +80,7 @@ export default function PaymentHandler({
           ondismiss: async function () {
             try {
               await axios.post(
-                "http://localhost:8000/api/payments/cancel-payment/",
+                `${API_URL}/api/payments/cancel-payment/`,
                 { appointment_id: appointmentId },
                 { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
               );

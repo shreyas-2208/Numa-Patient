@@ -6,6 +6,8 @@ import { fetchSessionPlans } from "../api/plans";
 import styles from "./BookAppointment.module.css";
 import PlanSelector from "../components/PlanSelector/PlanSelector";
 
+const API_URL = process.env.BACKEND_API_URL || "http://127.0.0.1:8000";
+
 function formatDateLabel(dateStr) {
   const d = new Date(dateStr);
   const today = new Date();
@@ -135,7 +137,7 @@ function BookAppointment() {
       };
 
       const { data } = await axios.post(
-        `http://localhost:8000/api/payments/create-order/${appointmentId}/`,
+        `${API_URL}/api/payments/create-order/${appointmentId}/`,
         requestData,
         { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
       );
@@ -149,7 +151,7 @@ function BookAppointment() {
         handler: async function (response) {
           try {
             await axios.post(
-              "http://localhost:8000/api/payments/verify-payment/",
+              `${API_URL}/api/payments/verify-payment/`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -159,7 +161,7 @@ function BookAppointment() {
             );
 
             await axios.post(
-          "http://localhost:8000/api/bookings/create/",
+          `${API_URL}/api/bookings/create/`,
           { appointment_id: appointmentId }, // pass the appointment ID created earlier
           { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
         );
@@ -178,7 +180,7 @@ function BookAppointment() {
         try {
           // call backend to mark payment & appointment as cancelled
           await axios.post(
-            "http://localhost:8000/api/payments/cancel-payment/",
+            `${API_URL}/api/payments/cancel-payment/`,
             { appointment_id: appointmentId },
             { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
           );
